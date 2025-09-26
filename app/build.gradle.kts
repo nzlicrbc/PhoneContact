@@ -1,3 +1,6 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -16,6 +19,21 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        val properties = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+
+        buildConfigField(
+            type = "String",
+            name = "CONTACT_API_KEY",
+            value = "\"${properties.getProperty("CONTACT_API_KEY")}\""
+        )
+        buildConfigField(
+            type = "String",
+            name = "CONTACT_API_BASE_URL",
+            value = "\"${properties.getProperty("CONTACT_API_BASE_URL")}\""
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

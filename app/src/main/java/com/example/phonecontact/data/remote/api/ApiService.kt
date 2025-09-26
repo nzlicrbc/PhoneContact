@@ -1,5 +1,7 @@
 package com.example.phonecontact.data.remote.api
 
+import com.example.phonecontact.data.remote.dto.ApiResponse
+import com.example.phonecontact.data.remote.dto.ContactDto
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
