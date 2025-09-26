@@ -5,7 +5,7 @@ import com.example.phonecontact.domain.repository.ContactRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class GetContactsUseCase @Inject constructor(
+class GetContactUseCase @Inject constructor(
     private val repository: ContactRepository
 ) {
     operator fun invoke(): Flow<List<Contact>> {
