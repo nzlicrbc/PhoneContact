@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.phonecontact.domain.usecase.CreateContactUseCase
 import com.example.phonecontact.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,23 +81,36 @@ class NewContactViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update { it.copy(isSaving = true, error = null) }
 
-            val result = createContactUseCase(
-                firstName = _state.value.firstName,
-                lastName = _state.value.lastName,
-                phoneNumber = _state.value.phoneNumber,
-                profileImageUrl = _state.value.profileImageUrl
-            )
+            try {
+                delay(2000)
 
-            _state.update {
+                val result = createContactUseCase(
+                    firstName = _state.value.firstName,
+                    lastName = _state.value.lastName,
+                    phoneNumber = _state.value.phoneNumber,
+                    profileImageUrl = _state.value.profileImageUrl
+                )
+
                 if (result.isSuccess) {
-                    it.copy(
-                        isSaving = false,
-                        isContactSaved = true
-                    )
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            isContactSaved = true
+                        )
+                    }
                 } else {
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            error = result.exceptionOrNull()?.message ?: "Failed to save contact"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
                     it.copy(
                         isSaving = false,
-                        error = result.exceptionOrNull()?.message ?: "Failed to save contact"
+                        error = e.message ?: "An error occurred"
                     )
                 }
             }

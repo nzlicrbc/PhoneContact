@@ -1,12 +1,13 @@
 package com.example.phonecontact.presentation.addcontact
 
+import com.example.phonecontact.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.phonecontact.ui.theme.*
 
@@ -37,7 +38,7 @@ fun PhotoSelectionBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Camera,
+                    painter = painterResource(R.drawable.camera),
                     contentDescription = "Camera",
                     modifier = Modifier.size(Dimensions.iconSizeMedium),
                     tint = Blue
@@ -63,7 +64,7 @@ fun PhotoSelectionBottomSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = Icons.Default.Collections,
+                    painter = painterResource(R.drawable.photo),
                     contentDescription = "Gallery",
                     modifier = Modifier.size(Dimensions.iconSizeMedium),
                     tint = Blue
