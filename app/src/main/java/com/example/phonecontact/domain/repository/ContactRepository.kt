@@ -11,7 +11,7 @@ interface ContactRepository {
     fun searchContacts(query: String): Flow<List<Contact>>
     suspend fun insertContact(contact: Contact): Long
     suspend fun updateContact(contact: Contact): Int
-    suspend fun deleteContact(contact: Contact): Int
+    suspend fun deleteContact(contact: String): Int
     suspend fun syncAllContacts(): Result<List<Contact>>
     suspend fun createContactRemote(contact: Contact): Result<Contact>
     suspend fun updateContactRemote(contact: Contact): Result<Contact>

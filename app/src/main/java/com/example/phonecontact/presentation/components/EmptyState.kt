@@ -2,7 +2,7 @@ package com.example.phonecontact.presentation.components
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PersonOutline
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,7 +27,7 @@ fun EmptyState(
         verticalArrangement = Arrangement.Center
     ) {
         Icon(
-            imageVector = Icons.Default.PersonOutline,
+            imageVector = Icons.Default.Person,
             contentDescription = null,
             modifier = Modifier.size(80.dp),
             tint = TextTertiary

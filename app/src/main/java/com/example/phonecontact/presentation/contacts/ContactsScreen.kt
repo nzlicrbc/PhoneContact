@@ -96,13 +96,28 @@ fun ContactsScreen(
                 }
                 else -> {
                     LazyColumn(
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
-                        item {
-                            Text(
-                                "Contacts will be listed here",
-                                modifier = Modifier.padding(16.dp)
-                            )
+                        state.groupedContacts.forEach { (letter, contactsForLetter) ->
+                            item(key = "header_$letter") {
+                                SectionHeader(letter = letter.toString())
+                            }
+
+                            items(
+                                count = contactsForLetter.size,
+                                key = { index -> contactsForLetter[index].id }
+                            ) { index ->
+                                val contact = contactsForLetter[index]
+                                val isLast = index == contactsForLetter.size - 1
+
+                                ContactListItem(
+                                    contact = contact,
+                                    onClick = { onNavigateToProfile(contact.id) },
+                                    showDivider = !isLast,
+                                    isInDeviceContacts = contact.isInDeviceContacts
+                                )
+                            }
                         }
                     }
                 }

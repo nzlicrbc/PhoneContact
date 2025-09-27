@@ -47,8 +47,13 @@ class ContactRepositoryImpl @Inject constructor(
         return localDataSource.updateContact(contact.toEntity())
     }
 
-    override suspend fun deleteContact(contact: Contact): Int {
-        return localDataSource.deleteContact(contact.toEntity())
+    override suspend fun deleteContact(contactId: String): Int {
+        val contact = localDataSource.getContactById(contactId)
+        return if (contact != null) {
+            localDataSource.deleteContact(contact)
+        } else {
+            0
+        }
     }
 
     override suspend fun syncAllContacts(): Result<List<Contact>> {
