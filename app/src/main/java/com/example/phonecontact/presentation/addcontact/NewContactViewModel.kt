@@ -3,6 +3,7 @@ package com.example.phonecontact.presentation.addcontact
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.phonecontact.domain.usecase.CreateContactUseCase
+import com.example.phonecontact.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,7 +14,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class NewContactViewModel @Inject constructor(
-    private val createContactUseCase: CreateContactUseCase
+    private val createContactUseCase: CreateContactUseCase,
+    private val uploadImageUseCase: UploadImageUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NewContactState())
@@ -46,8 +48,15 @@ class NewContactViewModel @Inject constructor(
                     )
                 }
             }
+
             is NewContactEvent.ProfileImageSelected -> {
-                _state.update { it.copy(profileImageUri = event.uri) }
+                _state.update {
+                    it.copy(
+                        profileImageUri = event.uri,
+                        profileImageBytes = event.imageBytes
+                    )
+                }
+                event.imageBytes?.let { uploadImage(it) }
             }
             NewContactEvent.SaveContact -> {
                 saveContact()
@@ -120,5 +129,27 @@ class NewContactViewModel @Inject constructor(
 
     private fun formatPhoneNumber(number: String): String {
         return number.filter { it.isDigit() || it == '+' }
+    }
+
+    private fun uploadImage(imageBytes: ByteArray) {
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            val result = uploadImageUseCase(imageBytes)
+
+            _state.update {
+                if (result.isSuccess) {
+                    it.copy(
+                        isLoading = false,
+                        profileImageUrl = result.getOrNull()
+                    )
+                } else {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to upload image"
+                    )
+                }
+            }
+        }
     }
 }

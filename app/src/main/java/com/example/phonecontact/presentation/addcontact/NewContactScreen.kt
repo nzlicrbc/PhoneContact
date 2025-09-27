@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
+import com.example.phonecontact.utils.rememberImagePicker
 import com.example.phonecontact.presentation.components.CustomTextField
 import com.example.phonecontact.presentation.components.CustomTextButton
 import com.example.phonecontact.ui.theme.*
@@ -29,6 +30,26 @@ fun NewContactScreen(
     viewModel: NewContactViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    val (launchCamera, launchGallery) = rememberImagePicker { uri, bytes ->
+        uri?.let {
+            viewModel.onEvent(NewContactEvent.ProfileImageSelected(it.toString(), bytes))
+        }
+    }
+
+    if (state.showPhotoSelectionSheet) {
+        PhotoSelectionBottomSheet(
+            onDismiss = { viewModel.onEvent(NewContactEvent.DismissPhotoSheet) },
+            onCameraSelected = {
+                viewModel.onEvent(NewContactEvent.DismissPhotoSheet)
+                launchCamera()
+            },
+            onGallerySelected = {
+                viewModel.onEvent(NewContactEvent.DismissPhotoSheet)
+                launchGallery()
+            }
+        )
+    }
 
     LaunchedEffect(state.isContactSaved) {
         if (state.isContactSaved) {
