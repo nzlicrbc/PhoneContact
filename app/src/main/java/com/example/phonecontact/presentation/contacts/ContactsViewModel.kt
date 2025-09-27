@@ -71,7 +71,6 @@ class ContactsViewModel @Inject constructor(
 
         if (query.isNotEmpty()) {
             searchContacts(query)
-            addToSearchHistory(query)
         } else {
             loadContacts()
         }
@@ -79,11 +78,22 @@ class ContactsViewModel @Inject constructor(
 
     private fun searchContacts(query: String) {
         viewModelScope.launch {
-            searchContactUseCase(query).collect { results ->
-                val grouped = groupContactsByFirstLetter(results)
+            val normalizedQuery = query.trim().lowercase()
+
+            getContactUseCase().collect { allContacts ->
+                val filteredContacts = allContacts.filter { contact ->
+                    val fullName = "${contact.firstName} ${contact.lastName}".lowercase()
+                    val reverseName = "${contact.lastName} ${contact.firstName}".lowercase()
+
+                    fullName.contains(normalizedQuery) ||
+                            reverseName.contains(normalizedQuery) ||
+                            contact.phoneNumber.contains(normalizedQuery)
+                }
+
+                val grouped = groupContactsByFirstLetter(filteredContacts)
                 _state.update {
                     it.copy(
-                        contacts = results,
+                        contacts = filteredContacts,
                         groupedContacts = grouped
                     )
                 }
