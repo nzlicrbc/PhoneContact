@@ -111,31 +111,47 @@ fun ContactsScreen(
                         contentPadding = PaddingValues(bottom = 16.dp)
                     ) {
                         state.groupedContacts.forEach { (letter, contactsForLetter) ->
-                            item(key = "header_$letter") {
-                                SectionHeader(letter = letter.toString())
-                            }
+                            item(key = "section_$letter") {
+                                Card(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = Dimensions.paddingMedium, vertical = 8.dp),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = SurfaceWhite
+                                    ),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                ) {
+                                    Column(modifier = Modifier.fillMaxWidth()) {
 
-                            items(
-                                count = contactsForLetter.size,
-                                key = { index -> contactsForLetter[index].id }
-                            ) { index ->
-                                val contact = contactsForLetter[index]
-                                val isLast = index == contactsForLetter.size - 1
+                                        Text(
+                                            text = letter.uppercase(),
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = TextSecondary,
+                                            modifier = Modifier
+                                                .padding(
+                                                    horizontal = Dimensions.paddingMedium,
+                                                    vertical = Dimensions.paddingSmall
+                                                )
+                                        )
 
-                                SwipeableContactItem(
-                                    contact = contact,
-                                    onClick = {
-                                        onNavigateToProfile(contact.id)
-                                    },
-                                    onEdit = {
-                                        onNavigateToEditContact(contact.id)
-                                    },
-                                    onDelete = {
-                                        viewModel.onEvent(ContactsEvent.DeleteContact(contact.id))
-                                    },
-                                    showDivider = !isLast,
-                                    isInDeviceContacts = contact.isInDeviceContacts
-                                )
+                                        DividerLine(
+                                            modifier = Modifier.fillMaxWidth()
+                                        )
+
+                                        contactsForLetter.forEachIndexed { index, contact ->
+                                            val isLast = index == contactsForLetter.size - 1
+
+                                            SwipeableContactItem(
+                                                contact = contact,
+                                                onClick = { onNavigateToProfile(contact.id) },
+                                                onEdit = { onNavigateToEditContact(contact.id) },
+                                                onDelete = { viewModel.onEvent(ContactsEvent.DeleteContact(contact.id)) },
+                                                showDivider = !isLast,
+                                                isInDeviceContacts = contact.isInDeviceContacts
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
