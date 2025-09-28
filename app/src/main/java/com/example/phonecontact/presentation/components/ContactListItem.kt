@@ -37,7 +37,8 @@ fun ContactListItem(
             ContactAvatar(
                 imageUrl = contact.profileImageUrl,
                 name = contact.firstName,
-                size = Dimensions.profileImageSize
+                size = Dimensions.profileImageSize,
+                enableColorShadow = true
             )
 
             Spacer(modifier = Modifier.width(12.dp))

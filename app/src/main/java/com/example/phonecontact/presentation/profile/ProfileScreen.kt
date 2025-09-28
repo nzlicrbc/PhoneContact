@@ -158,7 +158,8 @@ fun ProfileScreen(
                             ContactAvatar(
                                 imageUrl = state.contact!!.profileImageUrl,
                                 name = state.contact!!.firstName,
-                                size = Dimensions.profileImageSizeLarge
+                                size = Dimensions.profileImageSizeLarge,
+                                enableColorShadow = true
                             )
 
                             Spacer(modifier = Modifier.height(12.dp))
