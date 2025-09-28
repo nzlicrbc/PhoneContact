@@ -15,3 +15,8 @@ data class ApiResponse<T>(
     @SerializedName("status")
     val status: Int? = null
 )
+
+data class ImageData(
+    @SerializedName("imageUrl")
+    val imageUrl: String
+)

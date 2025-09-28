@@ -62,7 +62,7 @@ class ContactRemoteDataSource @Inject constructor(
 
         val response = apiService.uploadImage(imagePart)
         if (response.success && response.data != null) {
-            return response.data
+            return response.data.imageUrl
         } else {
             throw Exception(response.message ?: "Failed to upload image")
         }

@@ -2,6 +2,7 @@ package com.example.phonecontact.data.remote.api
 
 import com.example.phonecontact.data.remote.dto.ApiResponse
 import com.example.phonecontact.data.remote.dto.ContactDto
+import com.example.phonecontact.data.remote.dto.ImageData
 import okhttp3.MultipartBody
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -42,5 +43,5 @@ interface ApiService {
     @POST("api/User/UploadImage")
     suspend fun uploadImage(
         @Part image: MultipartBody.Part
-    ): ApiResponse<String>
+    ): ApiResponse<ImageData>
 }

@@ -1,5 +1,6 @@
 package com.example.phonecontact.presentation.components
 
+import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -21,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.palette.graphics.Palette
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.request.SuccessResult
 import com.example.phonecontact.ui.theme.*
@@ -35,27 +36,24 @@ fun ContactAvatar(
     name: String,
     size: Dp = Dimensions.profileImageSize,
     modifier: Modifier = Modifier,
-    enableColorShadow: Boolean = true
+    enableColorShadow: Boolean = true,
+    cacheKey: String? = null
 ) {
     val context = LocalContext.current
     var dominantColor by remember { mutableStateOf(Color.Transparent) }
     val scope = rememberCoroutineScope()
 
-    val painter = rememberAsyncImagePainter(
-        model = ImageRequest.Builder(context)
-            .data(imageUrl)
-            .crossfade(true)
-            .build(),
-        onSuccess = { state ->
-            if (enableColorShadow) {
-                scope.launch {
-                    extractDominantColor(state.result)?.let { color ->
-                        dominantColor = Color(color)
-                    }
-                }
-            }
+    val finalImageUrl = remember(imageUrl, cacheKey) {
+        when {
+            imageUrl.isNullOrEmpty() -> null
+            cacheKey != null -> "$imageUrl?cache=$cacheKey"
+            else -> "$imageUrl?cache=${System.currentTimeMillis()}"
         }
-    )
+    }
+
+    LaunchedEffect(dominantColor) {
+        println("Dominant color changed: $dominantColor")
+    }
 
     Box(
         modifier = modifier
@@ -72,9 +70,30 @@ fun ContactAvatar(
             .clip(CircleShape),
         contentAlignment = Alignment.Center
     ) {
-        if (!imageUrl.isNullOrEmpty()) {
+        if (!finalImageUrl.isNullOrEmpty()) {
             AsyncImage(
-                model = imageUrl,
+                model = ImageRequest.Builder(context)
+                    .data(finalImageUrl)
+                    .crossfade(true)
+                    .memoryCachePolicy(CachePolicy.ENABLED)
+                    .diskCachePolicy(CachePolicy.ENABLED)
+                    .listener(
+                        onSuccess = { _, result ->
+                            if (enableColorShadow) {
+                                scope.launch(Dispatchers.IO) {
+                                    extractDominantColor(result)?.let { color ->
+                                        withContext(Dispatchers.Main) {
+                                            dominantColor = Color(color)
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        onError = { _, _ ->
+                            println("Image load failed for: $finalImageUrl")
+                        }
+                    )
+                    .build(),
                 contentDescription = "Profile Photo",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
@@ -105,34 +124,36 @@ fun ContactAvatar(
     }
 }
 
-private suspend fun extractDominantColor(result: SuccessResult): Int? {
-    return withContext(Dispatchers.IO) {
-        try {
-            val drawable = result.drawable
-            if (drawable is BitmapDrawable) {
-                val bitmap = drawable.bitmap
-                val palette = Palette.from(bitmap).generate()
+private fun extractDominantColor(result: SuccessResult): Int? {
+    return try {
+        val drawable = result.drawable
+        if (drawable is BitmapDrawable) {
+            val bitmap = drawable.bitmap
 
-                palette.vibrantSwatch?.rgb
-                    ?: palette.dominantSwatch?.rgb
-                    ?: palette.mutedSwatch?.rgb
-                    ?: palette.darkVibrantSwatch?.rgb
-                    ?: palette.lightVibrantSwatch?.rgb
+            val scaledBitmap = if (bitmap.width > 150 || bitmap.height > 150) {
+                Bitmap.createScaledBitmap(bitmap, 150, 150, false)
             } else {
-                null
+                bitmap
             }
-        } catch (e: Exception) {
+
+            val palette = Palette.from(scaledBitmap)
+                .maximumColorCount(8)
+                .generate()
+
+            palette.vibrantSwatch?.rgb
+                ?: palette.lightVibrantSwatch?.rgb
+                ?: palette.darkVibrantSwatch?.rgb
+                ?: palette.dominantSwatch?.rgb
+        } else {
             null
         }
+    } catch (e: Exception) {
+        println("Color extraction error: ${e.message}")
+        null
     }
 }
 
 private fun DrawScope.drawColorShadow(color: Color) {
-    drawCircle(
-        color = color.copy(alpha = 0.3f),
-        radius = size.minDimension / 2 + 12.dp.toPx()
-    )
-
     drawCircle(
         color = color.copy(alpha = 0.2f),
         radius = size.minDimension / 2 + 8.dp.toPx()

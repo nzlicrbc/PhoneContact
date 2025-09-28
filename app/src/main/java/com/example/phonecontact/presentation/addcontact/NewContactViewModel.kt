@@ -89,7 +89,8 @@ class NewContactViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         profileImageUri = event.uri,
-                        profileImageBytes = event.imageBytes
+                        profileImageBytes = event.imageBytes,
+                        error = null
                     )
                 }
                 event.imageBytes?.let { uploadImage(it) }
@@ -231,21 +232,56 @@ class NewContactViewModel @Inject constructor(
 
     private fun uploadImage(imageBytes: ByteArray) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true) }
+            _state.update { it.copy(isLoading = true, error = null) }
 
-            val result = uploadImageUseCase(imageBytes)
+            try {
+                val result = uploadImageUseCase(imageBytes)
 
-            _state.update {
                 if (result.isSuccess) {
-                    it.copy(
-                        isLoading = false,
-                        profileImageUrl = result.getOrNull()
-                    )
+                    val imageUrl = result.getOrNull()
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            profileImageUrl = imageUrl,
+                            error = null
+                        )
+                    }
+
+                    if (editingContactId != null && imageUrl != null) {
+                        updateContactImageUrl(imageUrl)
+                    }
                 } else {
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            error = result.exceptionOrNull()?.message ?: "Failed to upload image"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
                     it.copy(
                         isLoading = false,
-                        error = "Failed to upload image"
+                        error = e.message ?: "Failed to upload image"
                     )
+                }
+            }
+        }
+    }
+
+    private fun updateContactImageUrl(imageUrl: String) {
+        editingContactId?.let { id ->
+            viewModelScope.launch {
+                try {
+                    val contact = com.example.phonecontact.domain.model.Contact(
+                        id = id,
+                        firstName = _state.value.firstName,
+                        lastName = _state.value.lastName,
+                        phoneNumber = _state.value.phoneNumber,
+                        profileImageUrl = imageUrl
+                    )
+                    updateContactUseCase(contact)
+                } catch (e: Exception) {
                 }
             }
         }
