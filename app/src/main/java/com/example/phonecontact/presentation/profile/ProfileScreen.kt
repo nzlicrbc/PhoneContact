@@ -1,5 +1,10 @@
 package com.example.phonecontact.presentation.profile
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import com.example.phonecontact.R
 import androidx.compose.foundation.clickable
@@ -12,14 +17,18 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.phonecontact.MainActivity
 import com.example.phonecontact.presentation.components.ContactAvatar
 import com.example.phonecontact.presentation.components.LoadingIndicator
 import com.example.phonecontact.ui.theme.*
 
+@SuppressLint("ContextCastToActivity")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
@@ -28,6 +37,15 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+
+    val context = LocalContext.current
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.onEvent(ProfileEvent.SaveToDevice)
+        }
+    }
 
     LaunchedEffect(state.isDeleteSuccess) {
         if (state.isDeleteSuccess) {
@@ -47,6 +65,7 @@ fun ProfileScreen(
                 state.isLoading -> {
                     LoadingIndicator()
                 }
+
                 state.contact != null -> {
                     Column(
                         modifier = Modifier.fillMaxSize()
@@ -210,7 +229,17 @@ fun ProfileScreen(
                             Spacer(modifier = Modifier.height(32.dp))
 
                             OutlinedButton(
-                                onClick = { viewModel.onEvent(ProfileEvent.SaveToDevice) },
+                                onClick = {
+                                    if (ContextCompat.checkSelfPermission(
+                                            context,
+                                            Manifest.permission.WRITE_CONTACTS
+                                        ) != PackageManager.PERMISSION_GRANTED
+                                    ) {
+                                        permissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
+                                    } else {
+                                        viewModel.onEvent(ProfileEvent.SaveToDevice)
+                                    }
+                                },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(48.dp),
