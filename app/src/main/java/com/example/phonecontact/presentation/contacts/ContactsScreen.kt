@@ -146,8 +146,7 @@ fun ContactsScreen(
                                                 onClick = { onNavigateToProfile(contact.id) },
                                                 onEdit = { onNavigateToEditContact(contact.id) },
                                                 onDelete = { viewModel.onEvent(ContactsEvent.DeleteContact(contact.id)) },
-                                                showDivider = !isLast,
-                                                isInDeviceContacts = contact.isInDeviceContacts
+                                                showDivider = !isLast
                                             )
                                         }
                                     }

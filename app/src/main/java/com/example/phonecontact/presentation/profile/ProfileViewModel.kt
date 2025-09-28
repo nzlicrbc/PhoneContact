@@ -150,7 +150,14 @@ class ProfileViewModel @Inject constructor(
                 }
                 context.contentResolver.insert(ContactsContract.Data.CONTENT_URI, phoneValues)
 
-                _state.update { it.copy(isSavedToDevice = true) }
+                repository.updateContactDeviceStatus(contactId, true)
+
+                _state.update {
+                    it.copy(
+                        isSavedToDevice = true,
+                        contact = it.contact?.copy(isInDeviceContacts = true)
+                    )
+                }
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message) }
             }

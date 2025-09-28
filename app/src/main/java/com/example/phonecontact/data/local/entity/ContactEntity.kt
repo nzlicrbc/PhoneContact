@@ -28,4 +28,5 @@ data class ContactEntity(
 
     @ColumnInfo(name = "created_at")
     val createdAt: String? = null
+
 )

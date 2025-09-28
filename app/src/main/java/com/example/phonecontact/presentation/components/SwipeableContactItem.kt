@@ -25,8 +25,7 @@ fun SwipeableContactItem(
     onClick: () -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
-    showDivider: Boolean = true,
-    isInDeviceContacts: Boolean = false
+    showDivider: Boolean = true
 ) {
     var showDeleteBottomSheet by remember { mutableStateOf(false) }
     var shouldResetSwipe by remember { mutableStateOf(false) }
@@ -109,8 +108,7 @@ fun SwipeableContactItem(
             ContactListItem(
                 contact = contact,
                 onClick = onClick,
-                showDivider = showDivider,
-                isInDeviceContacts = isInDeviceContacts
+                showDivider = showDivider
             )
         }
 

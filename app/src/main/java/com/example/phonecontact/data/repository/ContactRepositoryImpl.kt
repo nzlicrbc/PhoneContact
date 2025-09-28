@@ -137,4 +137,8 @@ class ContactRepositoryImpl @Inject constructor(
     override suspend fun clearAllSearchHistory() {
         return localDataSource.clearAllSearchHistory()
     }
+
+    override suspend fun updateContactDeviceStatus(contactId: String, isInDeviceContacts: Boolean) {
+        localDataSource.updateDeviceStatus(contactId, isInDeviceContacts)
+    }
 }

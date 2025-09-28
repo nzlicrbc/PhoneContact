@@ -20,4 +20,5 @@ interface ContactRepository {
     fun getRecentSearches(limit: Int = 10): Flow<List<SearchHistory>>
     suspend fun insertSearch(searchHistory: SearchHistory): Long
     suspend fun clearAllSearchHistory()
+    suspend fun updateContactDeviceStatus(contactId: String, isInDeviceContacts: Boolean)
 }

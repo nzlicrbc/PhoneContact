@@ -3,12 +3,14 @@ package com.example.phonecontact.presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.phonecontact.domain.model.Contact
 import com.example.phonecontact.ui.theme.*
@@ -18,9 +20,10 @@ fun ContactListItem(
     contact: Contact,
     onClick: () -> Unit,
     showDivider: Boolean = true,
-    isInDeviceContacts: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val isInDeviceContacts = contact.isInDeviceContacts ?: false
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -34,12 +37,36 @@ fun ContactListItem(
                 .height(Dimensions.contactItemHeight),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ContactAvatar(
-                imageUrl = contact.profileImageUrl,
-                name = contact.firstName,
-                size = Dimensions.profileImageSize,
-                enableColorShadow = true
-            )
+            Box(
+                modifier = Modifier.size(Dimensions.profileImageSize)
+            ) {
+                ContactAvatar(
+                    imageUrl = contact.profileImageUrl,
+                    name = contact.firstName,
+                    size = Dimensions.profileImageSize,
+                    enableColorShadow = true
+                )
+
+                if (isInDeviceContacts) {
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .background(
+                                color = Blue,
+                                shape = CircleShape
+                            )
+                            .align(Alignment.BottomEnd)
+                            .offset(x = 2.dp, y = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Phone,
+                            contentDescription = "Rehberde kayıtlı",
+                            modifier = Modifier.size(16.dp),
+                            tint = Color.White
+                        )
+                    }
+                }
+            }
 
             Spacer(modifier = Modifier.width(12.dp))
 
@@ -60,15 +87,6 @@ fun ContactListItem(
                         color = TextSecondary
                     )
                 }
-            }
-
-            if (isInDeviceContacts) {
-                Icon(
-                    imageVector = Icons.Default.Phone,
-                    contentDescription = "In device contacts",
-                    modifier = Modifier.size(Dimensions.iconSizeSmall),
-                    tint = Blue
-                )
             }
         }
 

@@ -49,4 +49,8 @@ class ContactLocalDataSource @Inject constructor(
     suspend fun clearAllSearchHistory() {
         return searchHistoryDao.clearAllHistory()
     }
+
+    suspend fun updateDeviceStatus(contactId: String, isInDeviceContacts: Boolean) {
+        contactDao.updateDeviceStatus(contactId, isInDeviceContacts)
+    }
 }

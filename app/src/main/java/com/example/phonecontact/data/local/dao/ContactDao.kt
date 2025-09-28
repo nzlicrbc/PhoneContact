@@ -35,4 +35,7 @@ interface ContactDao {
 
     @Delete
     suspend fun deleteContact(contact: ContactEntity): Int
+
+    @Query("UPDATE contacts SET is_in_device_contacts = :isInDeviceContacts WHERE id = :contactId")
+    suspend fun updateDeviceStatus(contactId: String, isInDeviceContacts: Boolean)
 }
