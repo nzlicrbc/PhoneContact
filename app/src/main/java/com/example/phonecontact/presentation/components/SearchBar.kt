@@ -38,7 +38,7 @@ fun SearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        color = Background,
+                        color = SurfaceWhite,
                         shape = RoundedCornerShape(10.dp)
                     )
                     .padding(horizontal = 12.dp, vertical = 10.dp),

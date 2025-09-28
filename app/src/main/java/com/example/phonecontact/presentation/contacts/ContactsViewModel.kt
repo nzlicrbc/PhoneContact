@@ -26,6 +26,9 @@ class ContactsViewModel @Inject constructor(
     @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
     fun onEvent(event: ContactsEvent) {
         when (event) {
+            is ContactsEvent.OnScreenAppeared -> {
+                loadContacts()
+            }
             is ContactsEvent.SearchQueryChanged -> {
                 updateSearchQuery(event.query)
             }
@@ -48,7 +51,7 @@ class ContactsViewModel @Inject constructor(
         }
     }
 
-    private fun loadContacts() {
+    fun loadContacts() {
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true) }
 

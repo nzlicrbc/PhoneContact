@@ -1,31 +1,28 @@
 package com.example.phonecontact.presentation.addcontact
 
-import com.example.phonecontact.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.AsyncImage
-import com.airbnb.lottie.compose.LottieAnimation
-import com.airbnb.lottie.compose.LottieCompositionSpec
-import com.airbnb.lottie.compose.LottieConstants
-import com.airbnb.lottie.compose.animateLottieCompositionAsState
-import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.*
+import com.example.phonecontact.R
 import com.example.phonecontact.utils.rememberImagePicker
-import com.example.phonecontact.presentation.components.CustomTextField
-import com.example.phonecontact.presentation.components.CustomTextButton
 import com.example.phonecontact.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,10 +30,13 @@ import com.example.phonecontact.ui.theme.*
 fun NewContactScreen(
     onNavigateBack: () -> Unit,
     onContactSaved: () -> Unit,
+    contactId: String? = null,
+    isEditMode: Boolean = false,
     viewModel: NewContactViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
 
+    // Lottie composition
     val composition by rememberLottieComposition(
         LottieCompositionSpec.RawRes(R.raw.done)
     )
@@ -52,18 +52,10 @@ fun NewContactScreen(
         }
     }
 
-    if (state.showPhotoSelectionSheet) {
-        PhotoSelectionBottomSheet(
-            onDismiss = { viewModel.onEvent(NewContactEvent.DismissPhotoSheet) },
-            onCameraSelected = {
-                viewModel.onEvent(NewContactEvent.DismissPhotoSheet)
-                launchCamera()
-            },
-            onGallerySelected = {
-                viewModel.onEvent(NewContactEvent.DismissPhotoSheet)
-                launchGallery()
-            }
-        )
+    LaunchedEffect(contactId) {
+        if (isEditMode && contactId != null) {
+            viewModel.loadContact(contactId)
+        }
     }
 
     LaunchedEffect(state.isContactSaved) {
@@ -78,23 +70,33 @@ fun NewContactScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "New Contact",
-                        style = MaterialTheme.typography.headlineMedium
+                        text = if (isEditMode) "Edit Contact" else "New Contact",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
                 },
                 navigationIcon = {
-                    CustomTextButton(
+                    Text(
                         text = "Cancel",
-                        onClick = onNavigateBack,
-                        textColor = Blue
+                        color = Blue,
+                        modifier = Modifier
+                            .padding(start = 16.dp)
+                            .clickable { onNavigateBack() },
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 },
                 actions = {
-                    CustomTextButton(
+                    Text(
                         text = "Done",
-                        onClick = { viewModel.onEvent(NewContactEvent.SaveContact) },
-                        enabled = state.isFormValid && !state.isSaving,
-                        textColor = Blue
+                        color = if (state.isFormValid && !state.isSaving) Blue else Color.Gray,
+                        modifier = Modifier
+                            .padding(end = 16.dp)
+                            .clickable(enabled = state.isFormValid && !state.isSaving) {
+                                viewModel.onEvent(NewContactEvent.SaveContact)
+                            },
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -102,7 +104,7 @@ fun NewContactScreen(
                 )
             )
         },
-        containerColor = Background
+        containerColor = SurfaceWhite
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
@@ -135,23 +137,12 @@ fun NewContactScreen(
                                     modifier = Modifier.fillMaxSize(),
                                     contentScale = ContentScale.Crop
                                 )
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Change Photo",
-                                    modifier = Modifier
-                                        .align(Alignment.BottomEnd)
-                                        .size(32.dp)
-                                        .clip(CircleShape)
-                                        .background(Blue)
-                                        .padding(8.dp),
-                                    tint = SurfaceWhite
-                                )
                             } else {
                                 Icon(
-                                    imageVector = Icons.Default.Add,
+                                    imageVector = Icons.Default.Person,
                                     contentDescription = "Add Photo",
-                                    modifier = Modifier.size(40.dp),
-                                    tint = Blue
+                                    modifier = Modifier.size(60.dp),
+                                    tint = TextSecondary
                                 )
                             }
                         }
@@ -169,19 +160,18 @@ fun NewContactScreen(
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(SurfaceWhite)
-                        .padding(horizontal = Dimensions.paddingMedium)
+                        .padding(horizontal = 16.dp)
                 ) {
-                    CustomTextField(
+                    OutlinedTextField(
                         value = state.firstName,
                         onValueChange = { viewModel.onEvent(NewContactEvent.FirstNameChanged(it)) },
-                        placeholder = "First Name",
+                        placeholder = { Text("First Name") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
                         isError = state.firstNameError != null
                     )
 
@@ -190,17 +180,19 @@ fun NewContactScreen(
                             text = error,
                             style = MaterialTheme.typography.labelSmall,
                             color = DeleteRed,
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    CustomTextField(
+                    OutlinedTextField(
                         value = state.lastName,
                         onValueChange = { viewModel.onEvent(NewContactEvent.LastNameChanged(it)) },
-                        placeholder = "Last Name",
+                        placeholder = { Text("Last Name") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
                         isError = state.lastNameError != null
                     )
 
@@ -209,17 +201,19 @@ fun NewContactScreen(
                             text = error,
                             style = MaterialTheme.typography.labelSmall,
                             color = DeleteRed,
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    CustomTextField(
+                    OutlinedTextField(
                         value = state.phoneNumber,
                         onValueChange = { viewModel.onEvent(NewContactEvent.PhoneNumberChanged(it)) },
-                        placeholder = "Phone Number",
+                        placeholder = { Text("Phone Number") },
+                        singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
                         isError = state.phoneNumberError != null
                     )
 
@@ -228,18 +222,16 @@ fun NewContactScreen(
                             text = error,
                             style = MaterialTheme.typography.labelSmall,
                             color = DeleteRed,
-                            modifier = Modifier.padding(top = 4.dp)
+                            modifier = Modifier.padding(start = 16.dp, top = 4.dp)
                         )
                     }
-
-                    Spacer(modifier = Modifier.height(16.dp))
                 }
 
                 state.error?.let { error ->
                     Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(Dimensions.paddingMedium),
+                            .padding(16.dp),
                         colors = CardDefaults.cardColors(
                             containerColor = DeleteRed.copy(alpha = 0.1f)
                         )
@@ -248,7 +240,7 @@ fun NewContactScreen(
                             text = error,
                             style = MaterialTheme.typography.bodyMedium,
                             color = DeleteRed,
-                            modifier = Modifier.padding(Dimensions.paddingMedium),
+                            modifier = Modifier.padding(16.dp),
                             textAlign = TextAlign.Center
                         )
                     }
@@ -259,7 +251,7 @@ fun NewContactScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(TextPrimary.copy(alpha = 0.5f)),
+                        .background(Color.Black.copy(alpha = 0.5f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Card(
@@ -276,6 +268,11 @@ fun NewContactScreen(
                                 progress = { lottieProgress },
                                 modifier = Modifier.size(100.dp)
                             )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "Saving contact...",
+                                style = MaterialTheme.typography.bodyLarge
+                            )
                         }
                     }
                 }
@@ -285,20 +282,15 @@ fun NewContactScreen(
         if (state.showPhotoSelectionSheet) {
             PhotoSelectionBottomSheet(
                 onDismiss = { viewModel.onEvent(NewContactEvent.DismissPhotoSheet) },
-                onCameraSelected = { viewModel.onEvent(NewContactEvent.CameraSelected) },
-                onGallerySelected = { viewModel.onEvent(NewContactEvent.GallerySelected) }
+                onCameraSelected = {
+                    viewModel.onEvent(NewContactEvent.DismissPhotoSheet)
+                    launchCamera()
+                },
+                onGallerySelected = {
+                    viewModel.onEvent(NewContactEvent.DismissPhotoSheet)
+                    launchGallery()
+                }
             )
-        }
-
-        if (state.isSaving) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(TextPrimary.copy(alpha = 0.5f)),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = Blue)
-            }
         }
     }
 }

@@ -2,16 +2,19 @@ package com.example.phonecontact.presentation.contacts
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.phonecontact.domain.model.Contact
 import com.example.phonecontact.presentation.components.*
 import com.example.phonecontact.ui.theme.*
 
@@ -20,11 +23,11 @@ import com.example.phonecontact.ui.theme.*
 @Composable
 fun ContactsScreen(
     onNavigateToAddContact: () -> Unit,
+    onNavigateToProfile: (String) -> Unit,
     onNavigateToEditContact: (String) -> Unit,
     viewModel: ContactsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    var selectedContact by remember { mutableStateOf<Contact?>(null) }
 
     LaunchedEffect(key1 = true) {
         viewModel.onEvent(ContactsEvent.OnScreenAppeared)
@@ -41,15 +44,22 @@ fun ContactsScreen(
                 },
                 actions = {
                     IconButton(onClick = onNavigateToAddContact) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add Contact",
-                            tint = Blue
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .background(Blue, shape = CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Contact",
+                                tint = Color.White
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SurfaceWhite
+                    containerColor = Background
                 )
             )
         },
@@ -115,7 +125,7 @@ fun ContactsScreen(
                                 SwipeableContactItem(
                                     contact = contact,
                                     onClick = {
-                                        selectedContact = contact
+                                        onNavigateToProfile(contact.id)
                                     },
                                     onEdit = {
                                         onNavigateToEditContact(contact.id)

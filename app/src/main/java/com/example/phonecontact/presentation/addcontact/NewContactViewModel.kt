@@ -2,7 +2,9 @@ package com.example.phonecontact.presentation.addcontact
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.phonecontact.domain.repository.ContactRepository
 import com.example.phonecontact.domain.usecase.CreateContactUseCase
+import com.example.phonecontact.domain.usecase.UpdateContactUseCase
 import com.example.phonecontact.domain.usecase.UploadImageUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -16,11 +18,45 @@ import javax.inject.Inject
 @HiltViewModel
 class NewContactViewModel @Inject constructor(
     private val createContactUseCase: CreateContactUseCase,
-    private val uploadImageUseCase: UploadImageUseCase
+    private val updateContactUseCase: UpdateContactUseCase,
+    private val uploadImageUseCase: UploadImageUseCase,
+    private val repository: ContactRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NewContactState())
     val state: StateFlow<NewContactState> = _state.asStateFlow()
+
+    private var editingContactId: String? = null
+
+    fun loadContact(contactId: String) {
+        editingContactId = contactId
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            try {
+                val contact = repository.getContactById(contactId)
+                contact?.let {
+                    _state.update { state ->
+                        state.copy(
+                            firstName = it.firstName,
+                            lastName = it.lastName,
+                            phoneNumber = it.phoneNumber,
+                            profileImageUrl = it.profileImageUrl,
+                            profileImageUri = it.profileImageUrl,
+                            isLoading = false
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Failed to load contact"
+                    )
+                }
+            }
+        }
+    }
 
     fun onEvent(event: NewContactEvent) {
         when (event) {
@@ -49,7 +85,6 @@ class NewContactViewModel @Inject constructor(
                     )
                 }
             }
-
             is NewContactEvent.ProfileImageSelected -> {
                 _state.update {
                     it.copy(
@@ -60,7 +95,11 @@ class NewContactViewModel @Inject constructor(
                 event.imageBytes?.let { uploadImage(it) }
             }
             NewContactEvent.SaveContact -> {
-                saveContact()
+                if (editingContactId != null) {
+                    updateContact()
+                } else {
+                    saveContact()
+                }
             }
             NewContactEvent.AddPhotoClicked -> {
                 _state.update { it.copy(showPhotoSelectionSheet = true) }
@@ -103,6 +142,51 @@ class NewContactViewModel @Inject constructor(
                         it.copy(
                             isSaving = false,
                             error = result.exceptionOrNull()?.message ?: "Failed to save contact"
+                        )
+                    }
+                }
+            } catch (e: Exception) {
+                _state.update {
+                    it.copy(
+                        isSaving = false,
+                        error = e.message ?: "An error occurred"
+                    )
+                }
+            }
+        }
+    }
+
+    private fun updateContact() {
+        if (!_state.value.isFormValid || editingContactId == null) return
+
+        viewModelScope.launch {
+            _state.update { it.copy(isSaving = true, error = null) }
+
+            try {
+                delay(2000)
+
+                val contact = com.example.phonecontact.domain.model.Contact(
+                    id = editingContactId!!,
+                    firstName = _state.value.firstName,
+                    lastName = _state.value.lastName,
+                    phoneNumber = _state.value.phoneNumber,
+                    profileImageUrl = _state.value.profileImageUrl
+                )
+
+                val result = updateContactUseCase(contact)
+
+                if (result.isSuccess) {
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            isContactSaved = true
+                        )
+                    }
+                } else {
+                    _state.update {
+                        it.copy(
+                            isSaving = false,
+                            error = result.exceptionOrNull()?.message ?: "Failed to update contact"
                         )
                     }
                 }
