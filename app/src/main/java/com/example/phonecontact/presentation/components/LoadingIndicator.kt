@@ -5,8 +5,8 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import com.example.phonecontact.ui.theme.Blue
+import com.example.phonecontact.ui.theme.Dimensions
 
 @Composable
 fun LoadingIndicator(
@@ -18,7 +18,7 @@ fun LoadingIndicator(
     ) {
         CircularProgressIndicator(
             color = Blue,
-            strokeWidth = 2.dp
+            strokeWidth = Dimensions.progressIndicatorStroke
         )
     }
 }

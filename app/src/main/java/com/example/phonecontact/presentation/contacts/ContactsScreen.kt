@@ -13,10 +13,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.phonecontact.R
 import com.example.phonecontact.presentation.components.*
 import com.example.phonecontact.ui.theme.*
+import com.example.phonecontact.utils.Constants
 
 @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,7 +40,7 @@ fun ContactsScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Contacts",
+                        text = stringResource(R.string.contacts_title),
                         style = MaterialTheme.typography.headlineMedium
                     )
                 },
@@ -46,13 +48,13 @@ fun ContactsScreen(
                     IconButton(onClick = onNavigateToAddContact) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
+                                .size(Dimensions.fabSizeSmall)
                                 .background(Blue, shape = CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Add,
-                                contentDescription = "Add Contact",
+                                contentDescription = stringResource(R.string.add_contact),
                                 tint = Color.White
                             )
                         }
@@ -74,7 +76,10 @@ fun ContactsScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = Dimensions.paddingMedium)
-                    .padding(top = 8.dp, bottom = 8.dp)
+                    .padding(
+                        top = Dimensions.searchBarVerticalSpacing,
+                        bottom = Dimensions.searchBarVerticalSpacing
+                    )
             ) {
                 SearchBar(
                     query = state.searchQuery,
@@ -101,33 +106,38 @@ fun ContactsScreen(
                 }
                 state.contacts.isEmpty() && state.searchQuery.isEmpty() -> {
                     EmptyState(
-                        title = "No Contacts",
-                        message = "Contacts you've added will appear here.",
-                        buttonText = "Create New Contact",
+                        title = stringResource(R.string.no_contacts_title),
+                        message = stringResource(R.string.no_contacts_message),
+                        buttonText = stringResource(R.string.create_new_contact),
                         onButtonClick = onNavigateToAddContact
                     )
                 }
                 state.contacts.isEmpty() && state.searchQuery.isNotEmpty() -> {
                     EmptyState(
-                        title = "No Results",
-                        message = "The user you are looking for could not be found."
+                        title = stringResource(R.string.no_results_title),
+                        message = stringResource(R.string.no_results_message)
                     )
                 }
                 else -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(bottom = 16.dp)
+                        contentPadding = PaddingValues(bottom = Dimensions.paddingLarge)
                     ) {
                         state.groupedContacts.forEach { (letter, contactsForLetter) ->
-                            item(key = "section_$letter") {
+                            item(key = "${Constants.SECTION_KEY_PREFIX}$letter") {
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = Dimensions.paddingMedium, vertical = 4.dp),
+                                        .padding(
+                                            horizontal = Dimensions.paddingMedium,
+                                            vertical = Dimensions.paddingSmall
+                                        ),
                                     colors = CardDefaults.cardColors(
                                         containerColor = SurfaceWhite
                                     ),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                    elevation = CardDefaults.cardElevation(
+                                        defaultElevation = Dimensions.elevationNone
+                                    )
                                 ) {
                                     Column(modifier = Modifier.fillMaxWidth()) {
                                         Text(
@@ -150,7 +160,9 @@ fun ContactsScreen(
                                                 contact = contact,
                                                 onClick = { onNavigateToProfile(contact.id) },
                                                 onEdit = { onNavigateToEditContact(contact.id) },
-                                                onDelete = { viewModel.onEvent(ContactsEvent.DeleteContact(contact.id)) },
+                                                onDelete = {
+                                                    viewModel.onEvent(ContactsEvent.DeleteContact(contact.id))
+                                                },
                                                 showDivider = !isLast
                                             )
                                         }

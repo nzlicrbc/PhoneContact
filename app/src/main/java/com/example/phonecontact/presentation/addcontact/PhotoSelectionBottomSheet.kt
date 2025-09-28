@@ -8,7 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import com.example.phonecontact.ui.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +25,7 @@ fun PhotoSelectionBottomSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 32.dp)
+                .padding(bottom = Dimensions.paddingExtraLarge)
         ) {
             Row(
                 modifier = Modifier
@@ -34,24 +34,27 @@ fun PhotoSelectionBottomSheet(
                         onCameraSelected()
                         onDismiss()
                     }
-                    .padding(horizontal = Dimensions.paddingMedium, vertical = 16.dp),
+                    .padding(
+                        horizontal = Dimensions.paddingMedium,
+                        vertical = Dimensions.paddingMedium
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     painter = painterResource(R.drawable.camera),
-                    contentDescription = "Camera",
+                    contentDescription = stringResource(R.string.camera),
                     modifier = Modifier.size(Dimensions.iconSizeMedium),
                     tint = Blue
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(Dimensions.spacingMedium))
                 Text(
-                    text = "Camera",
+                    text = stringResource(R.string.camera),
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextPrimary
                 )
             }
 
-            Divider(color = DividerColor, thickness = 0.5.dp)
+            Divider(color = DividerColor, thickness = Dimensions.dividerThickness)
 
             Row(
                 modifier = Modifier
@@ -60,18 +63,21 @@ fun PhotoSelectionBottomSheet(
                         onGallerySelected()
                         onDismiss()
                     }
-                    .padding(horizontal = Dimensions.paddingMedium, vertical = 16.dp),
+                    .padding(
+                        horizontal = Dimensions.paddingMedium,
+                        vertical = Dimensions.paddingMedium
+                    ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
                     painter = painterResource(R.drawable.photo),
-                    contentDescription = "Gallery",
+                    contentDescription = stringResource(R.string.gallery),
                     modifier = Modifier.size(Dimensions.iconSizeMedium),
                     tint = Blue
                 )
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(Dimensions.spacingMedium))
                 Text(
-                    text = "Gallery",
+                    text = stringResource(R.string.gallery),
                     style = MaterialTheme.typography.bodyLarge,
                     color = TextPrimary
                 )

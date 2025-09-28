@@ -11,7 +11,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.example.phonecontact.ui.theme.*
 
 @Composable
@@ -31,19 +30,19 @@ fun EmptyState(
     ) {
         Box(
             modifier = Modifier
-                .size(80.dp)
+                .size(Dimensions.emptyStateIconContainer)
                 .background(color = Gray214, shape = CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = Icons.Default.Person,
                 contentDescription = null,
-                modifier = Modifier.size(60.dp),
+                modifier = Modifier.size(Dimensions.emptyStateIcon),
                 tint = Color.White
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(Dimensions.paddingExtraLarge))
 
         Text(
             text = title,
@@ -52,7 +51,7 @@ fun EmptyState(
             textAlign = TextAlign.Center
         )
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(Dimensions.paddingMedium))
 
         Text(
             text = message,
@@ -62,7 +61,7 @@ fun EmptyState(
         )
 
         if (buttonText != null && onButtonClick != null) {
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(Dimensions.paddingMedium))
 
             CustomTextButton(
                 text = buttonText,

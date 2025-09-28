@@ -1,12 +1,16 @@
 package com.example.phonecontact.presentation.addcontact
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.phonecontact.R
 import com.example.phonecontact.domain.repository.ContactRepository
 import com.example.phonecontact.domain.usecase.CreateContactUseCase
 import com.example.phonecontact.domain.usecase.UpdateContactUseCase
 import com.example.phonecontact.domain.usecase.UploadImageUseCase
+import com.example.phonecontact.utils.Constants.CONTACT_SAVED_DELAY
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +24,8 @@ class NewContactViewModel @Inject constructor(
     private val createContactUseCase: CreateContactUseCase,
     private val updateContactUseCase: UpdateContactUseCase,
     private val uploadImageUseCase: UploadImageUseCase,
-    private val repository: ContactRepository
+    private val repository: ContactRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NewContactState())
@@ -51,7 +56,7 @@ class NewContactViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = "Failed to load contact"
+                        error = context.getString(R.string.error_failed_load_contact)
                     )
                 }
             }
@@ -122,7 +127,7 @@ class NewContactViewModel @Inject constructor(
             _state.update { it.copy(isSaving = true, error = null) }
 
             try {
-                delay(2000)
+                delay(CONTACT_SAVED_DELAY)
 
                 val result = createContactUseCase(
                     firstName = _state.value.firstName,
@@ -142,7 +147,7 @@ class NewContactViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isSaving = false,
-                            error = result.exceptionOrNull()?.message ?: "Failed to save contact"
+                            error = result.exceptionOrNull()?.message ?: context.getString(R.string.error_failed_save_contact)
                         )
                     }
                 }
@@ -150,7 +155,7 @@ class NewContactViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isSaving = false,
-                        error = e.message ?: "An error occurred"
+                        error = e.message ?: context.getString(R.string.error_generic)
                     )
                 }
             }
@@ -187,7 +192,7 @@ class NewContactViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isSaving = false,
-                            error = result.exceptionOrNull()?.message ?: "Failed to update contact"
+                            error = result.exceptionOrNull()?.message ?: context.getString(R.string.error_failed_update_contact)
                         )
                     }
                 }
@@ -195,7 +200,7 @@ class NewContactViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isSaving = false,
-                        error = e.message ?: "An error occurred"
+                        error = e.message ?: context.getString(R.string.error_generic)
                     )
                 }
             }
@@ -204,24 +209,24 @@ class NewContactViewModel @Inject constructor(
 
     private fun validateFirstName(name: String): String? {
         return when {
-            name.isBlank() -> "First name is required"
-            name.length < 2 -> "First name must be at least 2 characters"
+            name.isBlank() -> context.getString(R.string.error_first_name_required)
+            name.length < 2 -> context.getString(R.string.error_first_name_length)
             else -> null
         }
     }
 
     private fun validateLastName(name: String): String? {
         return when {
-            name.isBlank() -> "Last name is required"
-            name.length < 2 -> "Last name must be at least 2 characters"
+            name.isBlank() -> context.getString(R.string.error_last_name_required)
+            name.length < 2 -> context.getString(R.string.error_last_name_length)
             else -> null
         }
     }
 
     private fun validatePhoneNumber(number: String): String? {
         return when {
-            number.isBlank() -> "Phone number is required"
-            number.length < 10 -> "Phone number must be at least 10 digits"
+            number.isBlank() -> context.getString(R.string.error_phone_required)
+            number.length < 10 -> context.getString(R.string.error_phone_length)
             else -> null
         }
     }
@@ -254,7 +259,7 @@ class NewContactViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             isLoading = false,
-                            error = result.exceptionOrNull()?.message ?: "Failed to upload image"
+                            error = result.exceptionOrNull()?.message ?: context.getString(R.string.error_failed_upload_image)
                         )
                     }
                 }
@@ -262,7 +267,7 @@ class NewContactViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isLoading = false,
-                        error = e.message ?: "Failed to upload image"
+                        error = e.message ?: context.getString(R.string.error_generic)
                     )
                 }
             }

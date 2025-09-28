@@ -1,7 +1,11 @@
 package com.example.phonecontact.data.datasource.remote
 
+import android.content.Context
+import com.example.phonecontact.R
 import com.example.phonecontact.data.remote.api.ApiService
 import com.example.phonecontact.data.remote.dto.ContactDto
+import com.example.phonecontact.utils.Constants
+import dagger.hilt.android.qualifiers.ApplicationContext
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -10,7 +14,8 @@ import javax.inject.Singleton
 
 @Singleton
 class ContactRemoteDataSource @Inject constructor(
-    private val apiService: ApiService
+    private val apiService: ApiService,
+    @ApplicationContext private val context: Context
 ) {
 
     suspend fun createContact(contact: ContactDto): ContactDto {
@@ -18,7 +23,7 @@ class ContactRemoteDataSource @Inject constructor(
         if (response.success && response.data != null) {
             return response.data
         } else {
-            throw Exception(response.message ?: "Failed to create contact")
+            throw Exception(context.getString(R.string.error_create_contact))
         }
     }
 
@@ -27,7 +32,7 @@ class ContactRemoteDataSource @Inject constructor(
         if (response.success && response.data != null) {
             return response.data
         } else {
-            throw Exception(response.message ?: "Failed to get contact")
+            throw Exception(context.getString(R.string.error_get_contact))
         }
     }
 
@@ -36,14 +41,14 @@ class ContactRemoteDataSource @Inject constructor(
         if (response.success && response.data != null) {
             return response.data
         } else {
-            throw Exception(response.message ?: "Failed to update contact")
+            throw Exception(context.getString(R.string.error_update_contact))
         }
     }
 
     suspend fun deleteContact(id: String) {
         val response = apiService.deleteContact(id)
         if (!response.success) {
-            throw Exception(response.message ?: "Failed to delete contact")
+            throw Exception(context.getString(R.string.error_delete_contact))
         }
     }
 
@@ -52,19 +57,19 @@ class ContactRemoteDataSource @Inject constructor(
         if (response.success && response.data != null) {
             return response.data
         } else {
-            throw Exception(response.message ?: "Failed to get all contacts")
+            throw Exception(context.getString(R.string.error_get_all_contacts))
         }
     }
 
     suspend fun uploadImage(imageByteArray: ByteArray, fileName: String): String {
-        val requestFile = imageByteArray.toRequestBody("image/*".toMediaTypeOrNull())
-        val imagePart = MultipartBody.Part.createFormData("image", fileName, requestFile)
+        val requestFile = imageByteArray.toRequestBody(Constants.IMAGE_MEDIA_TYPE.toMediaTypeOrNull())
+        val imagePart = MultipartBody.Part.createFormData(Constants.IMAGE_PART_NAME, fileName, requestFile)
 
         val response = apiService.uploadImage(imagePart)
         if (response.success && response.data != null) {
             return response.data.imageUrl
         } else {
-            throw Exception(response.message ?: "Failed to upload image")
+            throw Exception(context.getString(R.string.error_upload_image))
         }
     }
 }

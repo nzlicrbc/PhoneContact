@@ -20,18 +20,21 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.phonecontact.R
 import com.example.phonecontact.domain.model.SearchHistory
 import com.example.phonecontact.ui.theme.*
+import com.example.phonecontact.utils.Constants
 
 @Composable
 fun SearchBar(
     query: String,
     onQueryChange: (String) -> Unit,
-    placeholder: String = "Search by name",
+    placeholder: String = stringResource(R.string.search_placeholder),
     searchHistory: List<SearchHistory> = emptyList(),
     onHistoryItemClick: (String) -> Unit = {},
     onClearHistory: () -> Unit = {},
@@ -52,7 +55,7 @@ fun SearchBar(
             onValueChange = onQueryChange,
             singleLine = true,
             textStyle = TextStyle(
-                fontSize = 16.sp,
+                fontSize = Constants.TEXT_SIZE_MEDIUM.sp,
                 color = TextPrimary
             ),
             cursorBrush = SolidColor(Blue),
@@ -62,24 +65,27 @@ fun SearchBar(
                         .fillMaxWidth()
                         .background(
                             color = SurfaceWhite,
-                            shape = RoundedCornerShape(10.dp)
+                            shape = RoundedCornerShape(Dimensions.cornerRadiusMedium)
                         )
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .padding(
+                            horizontal = Dimensions.paddingMedium,
+                            vertical = Dimensions.paddingMedium - 2.dp
+                        ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        modifier = Modifier.size(Dimensions.iconDefault),
                         tint = TextSecondary
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(Dimensions.spacingSmall))
                     Box(modifier = Modifier.weight(1f)) {
                         if (query.isEmpty()) {
                             Text(
                                 text = placeholder,
                                 style = TextStyle(
-                                    fontSize = 16.sp,
+                                    fontSize = Constants.TEXT_SIZE_MEDIUM.sp,
                                     color = TextSecondary
                                 )
                             )
@@ -93,12 +99,12 @@ fun SearchBar(
                                 onQueryChange("")
                                 focusManager.clearFocus()
                             },
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(Dimensions.iconDefault)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Clear,
-                                contentDescription = "Clear search",
-                                modifier = Modifier.size(16.dp),
+                                contentDescription = stringResource(R.string.clear_search),
+                                modifier = Modifier.size(Dimensions.iconSmall),
                                 tint = TextSecondary
                             )
                         }
@@ -115,14 +121,14 @@ fun SearchBar(
         )
 
         if (showHistory) {
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(Dimensions.spacingSmall))
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
                     containerColor = SurfaceWhite
                 ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                shape = RoundedCornerShape(10.dp)
+                elevation = CardDefaults.cardElevation(defaultElevation = Dimensions.elevationSmall),
+                shape = RoundedCornerShape(Dimensions.cornerRadiusMedium)
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth()
@@ -138,7 +144,7 @@ fun SearchBar(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Recent Searches",
+                            text = stringResource(R.string.recent_searches),
                             style = MaterialTheme.typography.labelMedium,
                             color = TextSecondary,
                             fontWeight = FontWeight.Medium
@@ -146,10 +152,13 @@ fun SearchBar(
 
                         TextButton(
                             onClick = onClearHistory,
-                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+                            contentPadding = PaddingValues(
+                                horizontal = Dimensions.spacingSmall,
+                                vertical = Dimensions.paddingSmall
+                            )
                         ) {
                             Text(
-                                text = "Clear",
+                                text = stringResource(R.string.clear_history),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Blue
                             )
@@ -159,10 +168,10 @@ fun SearchBar(
                     DividerLine(modifier = Modifier.fillMaxWidth())
 
                     LazyColumn(
-                        modifier = Modifier.heightIn(max = 200.dp)
+                        modifier = Modifier.heightIn(max = Dimensions.searchHistoryMaxHeight)
                     ) {
                         items(
-                            items = searchHistory.take(5),
+                            items = searchHistory.take(Constants.MAX_SEARCH_HISTORY_ITEMS),
                             key = { it.id }
                         ) { historyItem ->
                             SearchHistoryItem(
@@ -192,18 +201,18 @@ private fun SearchHistoryItem(
             .clickable { onClick() }
             .padding(
                 horizontal = Dimensions.paddingMedium,
-                vertical = 12.dp
+                vertical = Dimensions.paddingMedium
             ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             imageVector = Icons.Default.Search,
             contentDescription = null,
-            modifier = Modifier.size(18.dp),
+            modifier = Modifier.size(Dimensions.iconMedium),
             tint = TextSecondary
         )
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(Dimensions.spacingMedium))
 
         Text(
             text = searchHistory.searchQuery,

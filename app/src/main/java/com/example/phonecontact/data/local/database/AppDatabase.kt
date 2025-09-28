@@ -7,6 +7,7 @@ import com.example.phonecontact.data.local.dao.ContactDao
 import com.example.phonecontact.data.local.dao.SearchHistoryDao
 import com.example.phonecontact.data.local.entity.ContactEntity
 import com.example.phonecontact.data.local.entity.SearchHistoryEntity
+import com.example.phonecontact.utils.Constants
 
 @Database(
     entities = [
@@ -23,6 +24,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun searchHistoryDao(): SearchHistoryDao
 
     companion object {
-        const val DATABASE_NAME = "contacts_database"
+        const val DATABASE_NAME = Constants.DATABASE_NAME
     }
 }

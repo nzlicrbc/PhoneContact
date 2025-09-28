@@ -1,5 +1,6 @@
 package com.example.phonecontact.presentation.components
 
+import com.example.phonecontact.R
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
@@ -19,14 +20,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.request.SuccessResult
-import com.example.phonecontact.ui.theme.*
+import com.example.phonecontact.ui.theme.Dimensions
+import com.example.phonecontact.ui.theme.Background
+import com.example.phonecontact.ui.theme.TextSecondary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -58,12 +61,8 @@ fun ContactAvatar(
             .size(size)
             .then(
                 if (dominantColor != null && enableColorShadow) {
-                    Modifier.drawBehind {
-                        drawColorShadow(dominantColor!!)
-                    }
-                } else {
-                    Modifier
-                }
+                    Modifier.drawBehind { drawColorShadow(dominantColor!!) }
+                } else Modifier
             )
             .clip(CircleShape),
         contentAlignment = Alignment.Center
@@ -81,12 +80,9 @@ fun ContactAvatar(
                                 scope.launch(Dispatchers.IO) {
                                     try {
                                         val extractedColor = extractDominantColor(result)
-
                                         extractedColor?.let { colorInt ->
-                                            val color = Color(colorInt)
-
                                             withContext(Dispatchers.Main) {
-                                                dominantColor = color
+                                                dominantColor = Color(colorInt)
                                             }
                                         }
                                     } catch (e: Exception) {
@@ -100,7 +96,7 @@ fun ContactAvatar(
                         }
                     )
                     .build(),
-                contentDescription = "Profile Photo",
+                contentDescription = stringResource(R.string.profile_photo_desc),
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop
             )
@@ -114,14 +110,14 @@ fun ContactAvatar(
                 if (name.isNotEmpty()) {
                     Text(
                         text = name.first().uppercase(),
-                        fontSize = (size.value / 2.5).sp,
+                        fontSize = (size.value / Dimensions.profileTextSizeDivisor).sp,
                         color = TextSecondary
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Person,
-                        contentDescription = null,
-                        modifier = Modifier.size(size * 0.6f),
+                        contentDescription = stringResource(R.string.profile_photo_desc),
+                        modifier = Modifier.size(size * Dimensions.profileIconSizeFraction),
                         tint = TextSecondary
                     )
                 }
@@ -135,29 +131,18 @@ private suspend fun extractDominantColor(result: SuccessResult): Int? {
     return withContext(Dispatchers.IO) {
         try {
             val drawable = result.drawable
-
             if (drawable is BitmapDrawable) {
                 val originalBitmap = drawable.bitmap
-
-                if (originalBitmap.isRecycled) {
-                    return@withContext null
-                }
+                if (originalBitmap.isRecycled) return@withContext null
 
                 val workingBitmap = if (originalBitmap.config == Bitmap.Config.HARDWARE) {
                     originalBitmap.copy(Bitmap.Config.ARGB_8888, false)
-                } else {
-                    originalBitmap
-                }
+                } else originalBitmap
 
                 val dominantColor = extractDominantColorManually(workingBitmap)
-                if (workingBitmap != originalBitmap) {
-                    workingBitmap.recycle()
-                }
-
+                if (workingBitmap != originalBitmap) workingBitmap.recycle()
                 dominantColor
-            } else {
-                null
-            }
+            } else null
         } catch (e: Exception) {
             e.printStackTrace()
             null
@@ -169,7 +154,6 @@ private fun extractDominantColorManually(bitmap: Bitmap): Int? {
     return try {
         val width = bitmap.width
         val height = bitmap.height
-
         val stepSize = maxOf(1, minOf(width, height) / 20)
 
         val colorMap = mutableMapOf<Int, Int>()
@@ -178,7 +162,6 @@ private fun extractDominantColorManually(bitmap: Bitmap): Int? {
         for (y in 0 until height step stepSize) {
             for (x in 0 until width step stepSize) {
                 val pixel = bitmap.getPixel(x, y)
-
                 val alpha = (pixel shr 24) and 0xFF
                 if (alpha < 128) continue
 
@@ -190,24 +173,17 @@ private fun extractDominantColorManually(bitmap: Bitmap): Int? {
                 if (brightness < 30 || brightness > 225) continue
 
                 val groupedColor = groupSimilarColors(pixel)
-
                 colorMap[groupedColor] = (colorMap[groupedColor] ?: 0) + 1
                 totalPixels++
             }
         }
 
-        println("Sampled $totalPixels pixels, found ${colorMap.size} unique color groups")
-
         if (colorMap.isEmpty()) return null
-
         val dominantColor = colorMap.maxByOrNull { it.value }?.key
         val dominantCount = colorMap[dominantColor] ?: 0
         val percentage = (dominantCount.toFloat() / totalPixels * 100).toInt()
 
-        println("Dominant color appears in $percentage% of sampled pixels")
-
         if (percentage < 5) return null
-
         dominantColor
     } catch (e: Exception) {
         println("Manual color extraction error: ${e.message}")
@@ -219,45 +195,17 @@ private fun groupSimilarColors(color: Int): Int {
     val red = ((color shr 16) and 0xFF) / 32 * 32
     val green = ((color shr 8) and 0xFF) / 32 * 32
     val blue = (color and 0xFF) / 32 * 32
-
     return (0xFF shl 24) or (red shl 16) or (green shl 8) or blue
 }
 
 private fun DrawScope.drawColorShadow(color: Color) {
     val baseRadius = size.minDimension / 2
 
-    drawCircle(
-        color = color.copy(alpha = 0.06f),
-        radius = baseRadius + 16.dp.toPx()
-    )
-
-    drawCircle(
-        color = color.copy(alpha = 0.08f),
-        radius = baseRadius + 14.dp.toPx()
-    )
-
-    drawCircle(
-        color = color.copy(alpha = 0.10f),
-        radius = baseRadius + 12.dp.toPx()
-    )
-
-    drawCircle(
-        color = color.copy(alpha = 0.12f),
-        radius = baseRadius + 10.dp.toPx()
-    )
-
-    drawCircle(
-        color = color.copy(alpha = 0.14f),
-        radius = baseRadius + 8.dp.toPx()
-    )
-
-    drawCircle(
-        color = color.copy(alpha = 0.16f),
-        radius = baseRadius + 6.dp.toPx()
-    )
-
-    drawCircle(
-        color = color.copy(alpha = 0.18f),
-        radius = baseRadius + 4.dp.toPx()
-    )
+    drawCircle(color = color.copy(alpha = 0.06f), radius = baseRadius + Dimensions.shadowOffset1.toPx())
+    drawCircle(color = color.copy(alpha = 0.08f), radius = baseRadius + Dimensions.shadowOffset2.toPx())
+    drawCircle(color = color.copy(alpha = 0.10f), radius = baseRadius + Dimensions.shadowOffset3.toPx())
+    drawCircle(color = color.copy(alpha = 0.12f), radius = baseRadius + Dimensions.shadowOffset4.toPx())
+    drawCircle(color = color.copy(alpha = 0.14f), radius = baseRadius + Dimensions.shadowOffset5.toPx())
+    drawCircle(color = color.copy(alpha = 0.16f), radius = baseRadius + Dimensions.shadowOffset6.toPx())
+    drawCircle(color = color.copy(alpha = 0.18f), radius = baseRadius + Dimensions.shadowOffset7.toPx())
 }

@@ -7,7 +7,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import com.example.phonecontact.R
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,14 +19,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.phonecontact.R
 import com.example.phonecontact.presentation.components.ContactAvatar
 import com.example.phonecontact.presentation.components.LoadingIndicator
 import com.example.phonecontact.ui.theme.*
+import com.example.phonecontact.utils.Constants
 
 @SuppressLint("ContextCastToActivity")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,7 +84,10 @@ fun ProfileScreen(
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 16.dp),
+                                    .padding(
+                                        horizontal = Dimensions.paddingLarge,
+                                        vertical = Dimensions.paddingLarge
+                                    ),
                                 contentAlignment = Alignment.TopEnd
                             ) {
                                 IconButton(
@@ -92,13 +95,16 @@ fun ProfileScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.MoreVert,
-                                        contentDescription = "More options",
+                                        contentDescription = stringResource(R.string.more_options),
                                         tint = TextPrimary
                                     )
                                 }
 
                                 Box(
-                                    modifier = Modifier.offset(x = (-8).dp, y = 40.dp)
+                                    modifier = Modifier.offset(
+                                        x = (-Dimensions.dropdownMenuOffset),
+                                        y = Dimensions.dropdownMenuTopOffset
+                                    )
                                 ) {
                                     DropdownMenu(
                                         expanded = state.showMenu,
@@ -106,9 +112,9 @@ fun ProfileScreen(
                                         modifier = Modifier
                                             .background(
                                                 color = SurfaceWhite,
-                                                shape = RoundedCornerShape(12.dp)
+                                                shape = RoundedCornerShape(Dimensions.cornerRadiusDropdown)
                                             )
-                                            .width(150.dp)
+                                            .width(Dimensions.dropdownMenuWidth)
                                     ) {
                                         DropdownMenuItem(
                                             text = {
@@ -117,11 +123,11 @@ fun ProfileScreen(
                                                     horizontalArrangement = Arrangement.SpaceBetween,
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    Text("Edit", color = TextPrimary)
+                                                    Text(stringResource(R.string.edit), color = TextPrimary)
                                                     Icon(
                                                         painter = painterResource(id = R.drawable.pencil),
-                                                        contentDescription = "Edit",
-                                                        modifier = Modifier.size(20.dp),
+                                                        contentDescription = stringResource(R.string.edit),
+                                                        modifier = Modifier.size(Dimensions.iconDefault),
                                                         tint = TextPrimary
                                                     )
                                                 }
@@ -134,8 +140,8 @@ fun ProfileScreen(
 
                                         Divider(
                                             color = DividerColor,
-                                            thickness = 0.5.dp,
-                                            modifier = Modifier.padding(horizontal = 12.dp)
+                                            thickness = Dimensions.borderWidthThin,
+                                            modifier = Modifier.padding(horizontal = Dimensions.paddingMedium)
                                         )
 
                                         DropdownMenuItem(
@@ -145,11 +151,11 @@ fun ProfileScreen(
                                                     horizontalArrangement = Arrangement.SpaceBetween,
                                                     verticalAlignment = Alignment.CenterVertically
                                                 ) {
-                                                    Text("Delete", color = DeleteRed)
+                                                    Text(stringResource(R.string.delete), color = DeleteRed)
                                                     Icon(
                                                         painter = painterResource(id = R.drawable.delete),
-                                                        contentDescription = "Delete",
-                                                        modifier = Modifier.size(20.dp),
+                                                        contentDescription = stringResource(R.string.delete),
+                                                        modifier = Modifier.size(Dimensions.iconDefault),
                                                         tint = DeleteRed
                                                     )
                                                 }
@@ -166,7 +172,7 @@ fun ProfileScreen(
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 8.dp),
+                                    .padding(vertical = Dimensions.spacingSmall),
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 ContactAvatar(
@@ -176,72 +182,75 @@ fun ProfileScreen(
                                     enableColorShadow = true
                                 )
 
-                                Spacer(modifier = Modifier.height(12.dp))
+                                Spacer(modifier = Modifier.height(Dimensions.spacingMedium))
 
                                 Text(
-                                    text = if (state.contact!!.profileImageUrl != null) "Change Photo" else "Add Photo",
+                                    text = if (state.contact!!.profileImageUrl != null)
+                                        stringResource(R.string.change_photo)
+                                    else
+                                        stringResource(R.string.add_photo),
                                     color = Blue,
-                                    fontSize = 15.sp,
+                                    fontSize = TextSizes.small,
                                     modifier = Modifier.clickable {
                                         state.contact?.let { onNavigateToEdit(it.id) }
                                     }
                                 )
                             }
 
-                            Spacer(modifier = Modifier.height(24.dp))
+                            Spacer(modifier = Modifier.height(Dimensions.paddingXLarge))
 
                             Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp)
+                                    .padding(horizontal = Dimensions.paddingLarge)
                             ) {
                                 OutlinedTextField(
                                     value = state.contact!!.firstName,
                                     onValueChange = { },
-                                    placeholder = { Text("First Name") },
+                                    placeholder = { Text(stringResource(R.string.first_name)) },
                                     singleLine = true,
                                     readOnly = true,
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(8.dp),
+                                    shape = RoundedCornerShape(Dimensions.cornerRadiusTextField),
                                     colors = OutlinedTextFieldDefaults.colors(
                                         disabledBorderColor = DividerColor,
                                         unfocusedBorderColor = DividerColor
                                     )
                                 )
 
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(Dimensions.paddingLarge))
 
                                 OutlinedTextField(
                                     value = state.contact!!.lastName,
                                     onValueChange = { },
-                                    placeholder = { Text("Last Name") },
+                                    placeholder = { Text(stringResource(R.string.last_name)) },
                                     singleLine = true,
                                     readOnly = true,
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(8.dp),
+                                    shape = RoundedCornerShape(Dimensions.cornerRadiusTextField),
                                     colors = OutlinedTextFieldDefaults.colors(
                                         disabledBorderColor = DividerColor,
                                         unfocusedBorderColor = DividerColor
                                     )
                                 )
 
-                                Spacer(modifier = Modifier.height(16.dp))
+                                Spacer(modifier = Modifier.height(Dimensions.paddingLarge))
 
                                 OutlinedTextField(
                                     value = state.contact!!.phoneNumber,
                                     onValueChange = { },
-                                    placeholder = { Text("Phone Number") },
+                                    placeholder = { Text(stringResource(R.string.phone_number)) },
                                     singleLine = true,
                                     readOnly = true,
                                     modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(8.dp),
+                                    shape = RoundedCornerShape(Dimensions.cornerRadiusTextField),
                                     colors = OutlinedTextFieldDefaults.colors(
                                         disabledBorderColor = DividerColor,
                                         unfocusedBorderColor = DividerColor
                                     )
                                 )
 
-                                Spacer(modifier = Modifier.height(32.dp))
+                                Spacer(modifier = Modifier.height(Dimensions.paddingXXLarge))
 
                                 OutlinedButton(
                                     onClick = {
@@ -257,14 +266,14 @@ fun ProfileScreen(
                                     },
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .height(48.dp),
-                                    shape = RoundedCornerShape(24.dp),
+                                        .height(Dimensions.buttonHeightMedium),
+                                    shape = RoundedCornerShape(Dimensions.cornerRadiusLarge),
                                     colors = ButtonDefaults.outlinedButtonColors(
                                         contentColor = if (state.isSavedToDevice) TextSecondary else TextPrimary,
                                         containerColor = Color.Transparent
                                     ),
                                     border = ButtonDefaults.outlinedButtonBorder.copy(
-                                        width = 1.dp
+                                        width = Dimensions.borderWidthSmall
                                     ),
                                     enabled = !state.isSavedToDevice
                                 ) {
@@ -275,13 +284,13 @@ fun ProfileScreen(
                                         Icon(
                                             painter = painterResource(id = R.drawable.save),
                                             contentDescription = null,
-                                            modifier = Modifier.size(18.dp),
+                                            modifier = Modifier.size(Dimensions.iconMedium),
                                             tint = if (state.isSavedToDevice) TextSecondary else TextPrimary
                                         )
-                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Spacer(modifier = Modifier.width(Dimensions.spacingSmall))
                                         Text(
-                                            text = "Save to My Phone Contact",
-                                            fontSize = 15.sp
+                                            text = stringResource(R.string.save_to_phone),
+                                            fontSize = TextSizes.small
                                         )
                                     }
                                 }
@@ -298,40 +307,43 @@ fun ProfileScreen(
                     showDeleteBottomSheet = false
                     viewModel.onEvent(ProfileEvent.CancelDelete)
                 },
-                containerColor = Color.White,
+                containerColor = SurfaceWhite,
                 dragHandle = {
                     Box(
                         modifier = Modifier
-                            .width(40.dp)
-                            .height(4.dp)
-                            .background(Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
+                            .width(Dimensions.bottomSheetDragHandleWidth)
+                            .height(Dimensions.bottomSheetDragHandleHeight)
+                            .background(
+                                TextSecondary.copy(alpha = Constants.ALPHA_LIGHT),
+                                RoundedCornerShape(Dimensions.cornerRadiusXSmall)
+                            )
                     )
                 }
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(Dimensions.paddingXLarge),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Delete Contact",
+                        text = stringResource(R.string.delete_contact_title),
                         style = MaterialTheme.typography.headlineSmall,
-                        color = Color.Black,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        color = TextPrimary,
+                        modifier = Modifier.padding(bottom = Dimensions.spacingSmall)
                     )
 
                     Text(
-                        text = "Are you sure you want to delete this contact?",
+                        text = stringResource(R.string.delete_contact_confirmation),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
+                        color = TextSecondary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 32.dp)
+                        modifier = Modifier.padding(bottom = Dimensions.spacingXLarge)
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
                     ) {
                         OutlinedButton(
                             onClick = {
@@ -340,15 +352,18 @@ fun ProfileScreen(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp),
+                                .height(Dimensions.buttonHeightMedium),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = Color.White,
-                                contentColor = Color.Black
+                                containerColor = SurfaceWhite,
+                                contentColor = TextPrimary
                             ),
-                            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
-                            shape = RoundedCornerShape(24.dp)
+                            border = BorderStroke(
+                                Dimensions.borderWidthSmall,
+                                TextSecondary.copy(alpha = Constants.ALPHA_LIGHT)
+                            ),
+                            shape = RoundedCornerShape(Dimensions.cornerRadiusLarge)
                         ) {
-                            Text("No")
+                            Text(stringResource(R.string.cancel))
                         }
 
                         Button(
@@ -358,14 +373,14 @@ fun ProfileScreen(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp),
+                                .height(Dimensions.buttonHeightMedium),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Black,
-                                contentColor = Color.White
+                                containerColor = TextPrimary,
+                                contentColor = SurfaceWhite
                             ),
-                            shape = RoundedCornerShape(24.dp)
+                            shape = RoundedCornerShape(Dimensions.cornerRadiusLarge)
                         ) {
-                            Text("Yes")
+                            Text(stringResource(R.string.confirm))
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.example.phonecontact.presentation.addcontact
 
+import com.example.phonecontact.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -20,6 +22,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.phonecontact.presentation.components.ContactAvatar
 import com.example.phonecontact.utils.rememberImagePicker
 import com.example.phonecontact.ui.theme.*
+import com.example.phonecontact.ui.theme.Dimensions.CornerRadiusSmall
+import com.example.phonecontact.ui.theme.Dimensions.IconSizeLarge
+import com.example.phonecontact.ui.theme.Dimensions.PaddingHorizontal
+import com.example.phonecontact.ui.theme.Dimensions.SpacerMedium
+import com.example.phonecontact.ui.theme.Dimensions.SpacerSmall
+import com.example.phonecontact.utils.Constants.CONTACT_SAVED_DELAY
 import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -42,7 +50,7 @@ fun NewContactScreen(
 
     LaunchedEffect(state.isContactSaved) {
         if (state.isContactSaved) {
-            delay(2000)
+            delay(CONTACT_SAVED_DELAY)
             onContactSaved()
             viewModel.onEvent(NewContactEvent.ContactSavedAcknowledged)
         }
@@ -54,7 +62,9 @@ fun NewContactScreen(
                 TopAppBar(
                     title = {
                         Text(
-                            text = if (isEditMode) "Edit Contact" else "New Contact",
+                            text = if (isEditMode) stringResource(R.string.title_edit_contact) else stringResource(
+                                R.string.title_new_contact
+                            ),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
@@ -63,17 +73,17 @@ fun NewContactScreen(
                     },
                     navigationIcon = {
                         Text(
-                            text = "Cancel",
+                            text = stringResource(R.string.action_cancel),
                             color = Blue,
                             modifier = Modifier
-                                .padding(start = 16.dp)
+                                .padding(start = Dimensions.PaddingHorizontal)
                                 .clickable { onNavigateBack() },
                             style = MaterialTheme.typography.bodyMedium
                         )
                     },
                     actions = {
                         Text(
-                            text = "Done",
+                            text = stringResource(R.string.action_done),
                             color = if (state.isFormValid && !state.isSaving) Blue else Color.Gray,
                             modifier = Modifier
                                 .padding(end = 16.dp)
@@ -88,14 +98,16 @@ fun NewContactScreen(
             },
             containerColor = SurfaceWhite
         ) { paddingValues ->
-            Column(modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(SurfaceWhite)
-                        .padding(vertical = 24.dp),
+                        .padding(vertical = Dimensions.PaddingVerticalLarge),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -106,7 +118,8 @@ fun NewContactScreen(
                             if (state.profileImageUri != null) {
                                 ContactAvatar(
                                     imageUrl = state.profileImageUri,
-                                    name = "${state.firstName} ${state.lastName}".trim().ifEmpty { "Contact" },
+                                    name = "${state.firstName} ${state.lastName}".trim()
+                                        .ifEmpty { stringResource(R.string.avatar_fallback_name )},
                                     size = Dimensions.profileImageSizeLarge,
                                     enableColorShadow = true
                                 )
@@ -120,18 +133,18 @@ fun NewContactScreen(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Person,
-                                        contentDescription = "Add Photo",
-                                        modifier = Modifier.size(60.dp),
+                                        contentDescription = stringResource(R.string.content_description_add_photo),
+                                        modifier = Modifier.size(IconSizeLarge),
                                         tint = TextSecondary
                                     )
                                 }
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(12.dp))
+                        Spacer(modifier = Modifier.height(SpacerSmall))
 
                         Text(
-                            text = if (state.profileImageUri != null) "Change Photo" else "Add Photo",
+                            text = if (state.profileImageUri != null) stringResource(R.string.label_change_photo) else stringResource(R.string.label_add_photo),
                             style = MaterialTheme.typography.labelMedium,
                             color = Blue,
                             modifier = Modifier.clickable {
@@ -141,16 +154,18 @@ fun NewContactScreen(
                     }
                 }
 
-                Column(modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = PaddingHorizontal)
+                ) {
                     OutlinedTextField(
                         value = state.firstName,
                         onValueChange = { viewModel.onEvent(NewContactEvent.FirstNameChanged(it)) },
-                        placeholder = { Text("First Name") },
+                        placeholder = { Text(text = stringResource(R.string.placeholder_first_name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(CornerRadiusSmall),
                         isError = state.firstNameError != null
                     )
                     state.firstNameError?.let { error ->
@@ -162,15 +177,15 @@ fun NewContactScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(SpacerMedium))
 
                     OutlinedTextField(
                         value = state.lastName,
                         onValueChange = { viewModel.onEvent(NewContactEvent.LastNameChanged(it)) },
-                        placeholder = { Text("Last Name") },
+                        placeholder = { Text(text = stringResource(R.string.placeholder_last_name)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(CornerRadiusSmall),
                         isError = state.lastNameError != null
                     )
                     state.lastNameError?.let { error ->
@@ -182,15 +197,15 @@ fun NewContactScreen(
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(modifier = Modifier.height(SpacerMedium))
 
                     OutlinedTextField(
                         value = state.phoneNumber,
                         onValueChange = { viewModel.onEvent(NewContactEvent.PhoneNumberChanged(it)) },
-                        placeholder = { Text("Phone Number") },
+                        placeholder = { Text(text = stringResource(R.string.placeholder_phone_number)) },
                         singleLine = true,
                         modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(CornerRadiusSmall),
                         isError = state.phoneNumberError != null
                     )
                     state.phoneNumberError?.let { error ->

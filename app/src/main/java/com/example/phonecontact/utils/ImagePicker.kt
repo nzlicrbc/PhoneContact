@@ -18,12 +18,13 @@ class ImagePicker(
     private val context: Context,
     private val onImageSelected: (Uri?, ByteArray?) -> Unit
 ) {
+
     private fun createImageFile(): File {
-        val imageFileName = "JPEG_${System.currentTimeMillis()}_"
+        val imageFileName = "${Constants.IMAGE_FILE_PREFIX}${System.currentTimeMillis()}_"
         val storageDir = context.cacheDir
         return File.createTempFile(
             imageFileName,
-            ".jpg",
+            Constants.IMAGE_FILE_EXTENSION,
             storageDir
         )
     }
@@ -32,7 +33,7 @@ class ImagePicker(
         val imageFile = createImageFile()
         return FileProvider.getUriForFile(
             context,
-            "${context.packageName}.fileprovider",
+            "${context.packageName}${Constants.FILE_PROVIDER_SUFFIX}",
             imageFile
         )
     }
@@ -50,12 +51,14 @@ class ImagePicker(
 
     private fun compressBitmap(bitmap: Bitmap): ByteArray {
         val outputStream = ByteArrayOutputStream()
-        var quality = 100
+        var quality = Constants.INITIAL_COMPRESSION_QUALITY
+
         bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
 
-        while (outputStream.toByteArray().size > 1024 * 1024 && quality > 10) {
+        while (outputStream.toByteArray().size > Constants.MAX_IMAGE_SIZE_BYTES &&
+            quality > Constants.MIN_COMPRESSION_QUALITY) {
             outputStream.reset()
-            quality -= 10
+            quality -= Constants.COMPRESSION_STEP
             bitmap.compress(Bitmap.CompressFormat.JPEG, quality, outputStream)
         }
 

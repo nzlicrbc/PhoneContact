@@ -13,10 +13,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import com.example.phonecontact.R
 import com.example.phonecontact.domain.model.Contact
 import com.example.phonecontact.ui.theme.*
+import com.example.phonecontact.utils.Constants
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +69,7 @@ fun SwipeableContactItem(
                     ) {
                         Box(
                             modifier = Modifier
-                                .width(72.dp)
+                                .width(Dimensions.swipeActionWidth)
                                 .fillMaxHeight()
                                 .background(EditBlue)
                                 .clickable {
@@ -78,14 +80,14 @@ fun SwipeableContactItem(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit",
+                                contentDescription = stringResource(R.string.edit_contact),
                                 tint = Color.White
                             )
                         }
 
                         Box(
                             modifier = Modifier
-                                .width(72.dp)
+                                .width(Dimensions.swipeActionWidth)
                                 .fillMaxHeight()
                                 .background(DeleteRed)
                                 .clickable {
@@ -95,7 +97,7 @@ fun SwipeableContactItem(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Delete,
-                                contentDescription = "Delete",
+                                contentDescription = stringResource(R.string.delete_contact),
                                 tint = Color.White
                             )
                         }
@@ -115,54 +117,64 @@ fun SwipeableContactItem(
         if (showDeleteBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = { showDeleteBottomSheet = false },
-                containerColor = Color.White,
+                containerColor = SurfaceWhite,
                 dragHandle = {
                     Box(
                         modifier = Modifier
-                            .width(40.dp)
-                            .height(4.dp)
-                            .background(Color.Gray.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
+                            .width(Dimensions.bottomSheetDragHandleWidth)
+                            .height(Dimensions.bottomSheetDragHandleHeight)
+                            .background(
+                                TextSecondary.copy(alpha = Constants.ALPHA_LIGHT),
+                                RoundedCornerShape(Dimensions.cornerRadiusXSmall)
+                            )
                     )
                 }
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp),
+                        .padding(Dimensions.paddingXLarge),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Delete Contact",
+                        text = stringResource(R.string.delete_contact_title),
                         style = MaterialTheme.typography.headlineSmall,
-                        color = Color.Black,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        color = TextPrimary,
+                        modifier = Modifier.padding(bottom = Dimensions.spacingSmall)
                     )
 
                     Text(
-                        text = "Are you sure you want to delete ${contact.firstName} ${contact.lastName}?",
+                        text = stringResource(
+                            R.string.delete_contact_message,
+                            contact.firstName,
+                            contact.lastName
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
+                        color = TextSecondary,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(bottom = 32.dp)
+                        modifier = Modifier.padding(bottom = Dimensions.spacingXLarge)
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        horizontalArrangement = Arrangement.spacedBy(Dimensions.spacingLarge)
                     ) {
                         OutlinedButton(
                             onClick = { showDeleteBottomSheet = false },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp),
+                                .height(Dimensions.buttonHeightMedium),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                containerColor = Color.White,
-                                contentColor = Color.Black
+                                containerColor = SurfaceWhite,
+                                contentColor = TextPrimary
                             ),
-                            border = BorderStroke(1.dp, Color.Gray.copy(alpha = 0.3f)),
-                            shape = RoundedCornerShape(24.dp)
+                            border = BorderStroke(
+                                Dimensions.borderWidthSmall,
+                                TextSecondary.copy(alpha = Constants.ALPHA_LIGHT)
+                            ),
+                            shape = RoundedCornerShape(Dimensions.cornerRadiusLarge)
                         ) {
-                            Text("No")
+                            Text(stringResource(R.string.cancel))
                         }
 
                         Button(
@@ -172,14 +184,14 @@ fun SwipeableContactItem(
                             },
                             modifier = Modifier
                                 .weight(1f)
-                                .height(48.dp),
+                                .height(Dimensions.buttonHeightMedium),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = Color.Black,
-                                contentColor = Color.White
+                                containerColor = TextPrimary,
+                                contentColor = SurfaceWhite
                             ),
-                            shape = RoundedCornerShape(24.dp)
+                            shape = RoundedCornerShape(Dimensions.cornerRadiusLarge)
                         ) {
-                            Text("Yes")
+                            Text(stringResource(R.string.confirm))
                         }
                     }
                 }

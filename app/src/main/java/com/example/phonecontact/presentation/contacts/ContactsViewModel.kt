@@ -9,6 +9,7 @@ import com.example.phonecontact.domain.model.SearchHistory
 import com.example.phonecontact.domain.usecase.DeleteContactUseCase
 import com.example.phonecontact.domain.usecase.GetContactUseCase
 import com.example.phonecontact.domain.usecase.SearchContactUseCase
+import com.example.phonecontact.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -46,7 +47,7 @@ class ContactsViewModel @Inject constructor(
                 _state.update { it.copy(isSearchActive = event.isFocused) }
             }
             is ContactsEvent.AddToSearchHistory -> {
-                if (event.query.isNotBlank() && event.query.length >= 2) {
+                if (event.query.isNotBlank() && event.query.length >= Constants.MIN_SEARCH_QUERY_LENGTH) {
                     addToSearchHistory(event.query)
                 }
             }
@@ -120,7 +121,7 @@ class ContactsViewModel @Inject constructor(
         return contacts
             .sortedBy { it.firstName.uppercase() }
             .groupBy { contact ->
-                contact.firstName.firstOrNull()?.uppercaseChar() ?: '#'
+                contact.firstName.firstOrNull()?.uppercaseChar() ?: Constants.DEFAULT_GROUP_CHAR
             }
     }
 
@@ -137,7 +138,7 @@ class ContactsViewModel @Inject constructor(
                     searchedAt = System.currentTimeMillis()
                 ))
 
-                val limitedHistory = currentHistory.take(10)
+                val limitedHistory = currentHistory.take(Constants.MAX_SEARCH_HISTORY_STORAGE)
 
                 _state.update { it.copy(searchHistory = limitedHistory) }
 
