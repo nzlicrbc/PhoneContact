@@ -81,7 +81,8 @@ class ContactRepositoryImpl @Inject constructor(
 
             Result.success(domainContact)
         } catch (e: Exception) {
-            Result.failure(e)
+            localDataSource.insertContact(contact.toEntity())
+            Result.success(contact)
         }
     }
 

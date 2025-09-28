@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.phonecontact.domain.model.Contact
 import com.example.phonecontact.presentation.components.*
 import com.example.phonecontact.ui.theme.*
 
@@ -19,10 +20,11 @@ import com.example.phonecontact.ui.theme.*
 @Composable
 fun ContactsScreen(
     onNavigateToAddContact: () -> Unit,
-    onNavigateToProfile: (String) -> Unit,
+    onNavigateToEditContact: (String) -> Unit,
     viewModel: ContactsViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    var selectedContact by remember { mutableStateOf<Contact?>(null) }
 
     LaunchedEffect(key1 = true) {
         viewModel.onEvent(ContactsEvent.OnScreenAppeared)
@@ -58,7 +60,6 @@ fun ContactsScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search Bar
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -111,9 +112,17 @@ fun ContactsScreen(
                                 val contact = contactsForLetter[index]
                                 val isLast = index == contactsForLetter.size - 1
 
-                                ContactListItem(
+                                SwipeableContactItem(
                                     contact = contact,
-                                    onClick = { onNavigateToProfile(contact.id) },
+                                    onClick = {
+                                        selectedContact = contact
+                                    },
+                                    onEdit = {
+                                        onNavigateToEditContact(contact.id)
+                                    },
+                                    onDelete = {
+                                        viewModel.onEvent(ContactsEvent.DeleteContact(contact.id))
+                                    },
                                     showDivider = !isLast,
                                     isInDeviceContacts = contact.isInDeviceContacts
                                 )

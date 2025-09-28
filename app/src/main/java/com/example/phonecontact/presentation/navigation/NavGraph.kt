@@ -36,18 +36,6 @@ fun NavGraph(
                 },
                 onContactSaved = {
                     navController.navigate(Screen.Contacts.route) {
-                        popUpTo(Screen.Contacts.route) { inclusive = true }
-                    }
-                }
-            )
-        }
-        composable(route = Screen.AddContact.route) {
-            NewContactScreen(
-                onNavigateBack = {
-                    navController.popBackStack()
-                },
-                onContactSaved = {
-                    navController.navigate(Screen.Contacts.route) {
                         popUpTo(Screen.Contacts.route) {
                             inclusive = false
                         }
