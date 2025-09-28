@@ -1,7 +1,12 @@
+import java.util.Properties
+import kotlin.apply
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -14,6 +19,21 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
+
+        val properties = Properties().apply {
+            load(rootProject.file("local.properties").inputStream())
+        }
+
+        buildConfigField(
+            type = "String",
+            name = "CONTACT_API_KEY",
+            value = "\"${properties.getProperty("CONTACT_API_KEY")}\""
+        )
+        buildConfigField(
+            type = "String",
+            name = "CONTACT_API_BASE_URL",
+            value = "\"${properties.getProperty("CONTACT_API_BASE_URL")}\""
+        )
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -36,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -56,4 +77,16 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.room.runtime)
+    implementation(libs.room.ktx)
+    ksp(libs.room.compiler)
+    implementation(libs.coil.compose)
+    implementation(libs.lottie.compose)
+    implementation(libs.androidx.palette.ktx)
 }
