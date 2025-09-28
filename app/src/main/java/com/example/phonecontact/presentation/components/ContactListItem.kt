@@ -44,7 +44,7 @@ fun ContactListItem(
                     imageUrl = contact.profileImageUrl,
                     name = contact.firstName,
                     size = Dimensions.profileImageSize,
-                    enableColorShadow = true
+                    enableColorShadow = false
                 )
 
                 if (isInDeviceContacts) {

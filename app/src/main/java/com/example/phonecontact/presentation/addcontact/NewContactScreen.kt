@@ -13,16 +13,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
-import com.airbnb.lottie.compose.*
-import com.example.phonecontact.R
+import com.example.phonecontact.presentation.components.ContactAvatar
 import com.example.phonecontact.utils.rememberImagePicker
 import com.example.phonecontact.ui.theme.*
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,12 +32,6 @@ fun NewContactScreen(
     viewModel: NewContactViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.done))
-    val lottieProgress by animateLottieCompositionAsState(
-        composition = composition,
-        isPlaying = state.isSaving,
-        iterations = LottieConstants.IterateForever
-    )
     val (launchCamera, launchGallery) = rememberImagePicker { uri, bytes ->
         uri?.let { viewModel.onEvent(NewContactEvent.ProfileImageSelected(it.toString(), bytes)) }
     }
@@ -50,51 +42,52 @@ fun NewContactScreen(
 
     LaunchedEffect(state.isContactSaved) {
         if (state.isContactSaved) {
+            delay(2000)
             onContactSaved()
             viewModel.onEvent(NewContactEvent.ContactSavedAcknowledged)
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (isEditMode) "Edit Contact" else "New Contact",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                },
-                navigationIcon = {
-                    Text(
-                        text = "Cancel",
-                        color = Blue,
-                        modifier = Modifier
-                            .padding(start = 16.dp)
-                            .clickable { onNavigateBack() },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                actions = {
-                    Text(
-                        text = "Done",
-                        color = if (state.isFormValid && !state.isSaving) Blue else Color.Gray,
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .clickable(enabled = state.isFormValid && !state.isSaving) {
-                                viewModel.onEvent(NewContactEvent.SaveContact)
-                            },
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
-            )
-        },
-        containerColor = SurfaceWhite
-    ) { paddingValues ->
-        Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = if (isEditMode) "Edit Contact" else "New Contact",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    },
+                    navigationIcon = {
+                        Text(
+                            text = "Cancel",
+                            color = Blue,
+                            modifier = Modifier
+                                .padding(start = 16.dp)
+                                .clickable { onNavigateBack() },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    actions = {
+                        Text(
+                            text = "Done",
+                            color = if (state.isFormValid && !state.isSaving) Blue else Color.Gray,
+                            modifier = Modifier
+                                .padding(end = 16.dp)
+                                .clickable(enabled = state.isFormValid && !state.isSaving) {
+                                    viewModel.onEvent(NewContactEvent.SaveContact)
+                                },
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
+                )
+            },
+            containerColor = SurfaceWhite
+        ) { paddingValues ->
             Column(modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)) {
@@ -108,26 +101,30 @@ fun NewContactScreen(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
-                                .size(Dimensions.profileImageSizeLarge)
-                                .clip(CircleShape)
-                                .background(Background)
-                                .clickable { viewModel.onEvent(NewContactEvent.AddPhotoClicked) },
-                            contentAlignment = Alignment.Center
+                                .clickable { viewModel.onEvent(NewContactEvent.AddPhotoClicked) }
                         ) {
                             if (state.profileImageUri != null) {
-                                AsyncImage(
-                                    model = state.profileImageUri,
-                                    contentDescription = "Profile Photo",
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentScale = ContentScale.Crop
+                                ContactAvatar(
+                                    imageUrl = state.profileImageUri,
+                                    name = "${state.firstName} ${state.lastName}".trim().ifEmpty { "Contact" },
+                                    size = Dimensions.profileImageSizeLarge,
+                                    enableColorShadow = true
                                 )
                             } else {
-                                Icon(
-                                    imageVector = Icons.Default.Person,
-                                    contentDescription = "Add Photo",
-                                    modifier = Modifier.size(60.dp),
-                                    tint = TextSecondary
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(Dimensions.profileImageSizeLarge)
+                                        .clip(CircleShape)
+                                        .background(Background),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Person,
+                                        contentDescription = "Add Photo",
+                                        modifier = Modifier.size(60.dp),
+                                        tint = TextSecondary
+                                    )
+                                }
                             }
                         }
 
@@ -223,37 +220,15 @@ fun NewContactScreen(
                     }
                 }
             }
+        }
 
-            if (state.isSaving) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.5f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Card(
-                        modifier = Modifier.size(200.dp),
-                        colors = CardDefaults.cardColors(containerColor = SurfaceWhite)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            LottieAnimation(
-                                composition = composition,
-                                progress = { lottieProgress },
-                                modifier = Modifier.size(100.dp)
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "Saving contact...",
-                                style = MaterialTheme.typography.bodyLarge
-                            )
-                        }
-                    }
+        if (state.isContactSaved) {
+            ContactSavedScreen(
+                onDismiss = {
+                    onContactSaved()
+                    viewModel.onEvent(NewContactEvent.ContactSavedAcknowledged)
                 }
-            }
+            )
         }
 
         if (state.showPhotoSelectionSheet) {
