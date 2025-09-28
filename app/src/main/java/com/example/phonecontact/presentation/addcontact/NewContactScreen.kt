@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -35,27 +34,18 @@ fun NewContactScreen(
     viewModel: NewContactViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
-
-    // Lottie composition
-    val composition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(R.raw.done)
-    )
+    val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.done))
     val lottieProgress by animateLottieCompositionAsState(
         composition = composition,
         isPlaying = state.isSaving,
         iterations = LottieConstants.IterateForever
     )
-
     val (launchCamera, launchGallery) = rememberImagePicker { uri, bytes ->
-        uri?.let {
-            viewModel.onEvent(NewContactEvent.ProfileImageSelected(it.toString(), bytes))
-        }
+        uri?.let { viewModel.onEvent(NewContactEvent.ProfileImageSelected(it.toString(), bytes)) }
     }
 
     LaunchedEffect(contactId) {
-        if (isEditMode && contactId != null) {
-            viewModel.loadContact(contactId)
-        }
+        if (isEditMode && contactId != null) viewModel.loadContact(contactId)
     }
 
     LaunchedEffect(state.isContactSaved) {
@@ -99,19 +89,15 @@ fun NewContactScreen(
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = SurfaceWhite
-                )
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = SurfaceWhite)
             )
         },
         containerColor = SurfaceWhite
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            ) {
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -119,9 +105,7 @@ fun NewContactScreen(
                         .padding(vertical = 24.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Box(
                             modifier = Modifier
                                 .size(Dimensions.profileImageSizeLarge)
@@ -160,11 +144,9 @@ fun NewContactScreen(
                     }
                 }
 
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
-                ) {
+                Column(modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)) {
                     OutlinedTextField(
                         value = state.firstName,
                         onValueChange = { viewModel.onEvent(NewContactEvent.FirstNameChanged(it)) },
@@ -174,7 +156,6 @@ fun NewContactScreen(
                         shape = RoundedCornerShape(8.dp),
                         isError = state.firstNameError != null
                     )
-
                     state.firstNameError?.let { error ->
                         Text(
                             text = error,
@@ -195,7 +176,6 @@ fun NewContactScreen(
                         shape = RoundedCornerShape(8.dp),
                         isError = state.lastNameError != null
                     )
-
                     state.lastNameError?.let { error ->
                         Text(
                             text = error,
@@ -216,7 +196,6 @@ fun NewContactScreen(
                         shape = RoundedCornerShape(8.dp),
                         isError = state.phoneNumberError != null
                     )
-
                     state.phoneNumberError?.let { error ->
                         Text(
                             text = error,
@@ -232,9 +211,7 @@ fun NewContactScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(16.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = DeleteRed.copy(alpha = 0.1f)
-                        )
+                        colors = CardDefaults.cardColors(containerColor = DeleteRed.copy(alpha = 0.1f))
                     ) {
                         Text(
                             text = error,
