@@ -83,6 +83,14 @@ fun ContactsScreen(
                     },
                     onFocusChange = {
                         viewModel.onEvent(ContactsEvent.OnSearchFocusChanged(it))
+                    },
+                    searchHistory = state.searchHistory,
+                    onHistoryItemClick = { query ->
+                        viewModel.onEvent(ContactsEvent.SearchQueryChanged(query))
+                        viewModel.onEvent(ContactsEvent.AddToSearchHistory(query))
+                    },
+                    onClearHistory = {
+                        viewModel.onEvent(ContactsEvent.ClearSearchHistory)
                     }
                 )
             }
@@ -115,16 +123,15 @@ fun ContactsScreen(
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = Dimensions.paddingMedium, vertical = 8.dp),
+                                        .padding(horizontal = Dimensions.paddingMedium, vertical = 4.dp),
                                     colors = CardDefaults.cardColors(
                                         containerColor = SurfaceWhite
                                     ),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                                 ) {
                                     Column(modifier = Modifier.fillMaxWidth()) {
-
                                         Text(
-                                            text = letter.uppercase(),
+                                            text = letter.toString().uppercase(),
                                             style = MaterialTheme.typography.labelLarge,
                                             color = TextSecondary,
                                             modifier = Modifier
@@ -134,9 +141,7 @@ fun ContactsScreen(
                                                 )
                                         )
 
-                                        DividerLine(
-                                            modifier = Modifier.fillMaxWidth()
-                                        )
+                                        DividerLine(modifier = Modifier.fillMaxWidth())
 
                                         contactsForLetter.forEachIndexed { index, contact ->
                                             val isLast = index == contactsForLetter.size - 1
