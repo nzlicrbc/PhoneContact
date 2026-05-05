@@ -1,7 +1,5 @@
 package com.example.phonecontact.presentation.navigation
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -12,7 +10,6 @@ import com.example.phonecontact.presentation.addcontact.NewContactScreen
 import com.example.phonecontact.presentation.contacts.ContactsScreen
 import com.example.phonecontact.presentation.profile.ProfileScreen
 
-@RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 @Composable
 fun NavGraph(
     navController: NavHostController,

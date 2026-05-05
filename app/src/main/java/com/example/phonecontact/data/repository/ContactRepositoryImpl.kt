@@ -134,6 +134,10 @@ class ContactRepositoryImpl @Inject constructor(
         return localDataSource.insertSearch(searchHistory.toEntity())
     }
 
+    override suspend fun deleteSearchByQuery(query: String) {
+        localDataSource.deleteSearchByQuery(query)
+    }
+
     override suspend fun clearAllSearchHistory() {
         return localDataSource.clearAllSearchHistory()
     }
