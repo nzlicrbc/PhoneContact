@@ -5,12 +5,20 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.phonecontact.R
@@ -47,10 +57,6 @@ fun ProfileScreen(
         if (isGranted) {
             viewModel.onEvent(ProfileEvent.SaveToDevice)
         }
-    }
-
-    LaunchedEffect(state.contact?.profileImageUrl) {
-        println("Profile Avatar URL: ${state.contact?.profileImageUrl}")
     }
 
     LaunchedEffect(state.isDeleteSuccess) {
@@ -294,10 +300,72 @@ fun ProfileScreen(
                                         )
                                     }
                                 }
+
+                                if (state.isSavedToDevice) {
+                                    Spacer(modifier = Modifier.height(Dimensions.spacingSmall))
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Info,
+                                            contentDescription = null,
+                                            tint = TextSecondary,
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = stringResource(R.string.already_in_phone),
+                                            fontSize = 12.sp,
+                                            color = TextSecondary
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
+            }
+        }
+
+        AnimatedVisibility(
+            visible = state.showSavedToast,
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(bottom = Dimensions.paddingXLarge)
+        ) {
+            Row(
+                modifier = Modifier
+                    .background(
+                        color = Color(0xFF2DB35D),
+                        shape = RoundedCornerShape(Dimensions.cornerRadiusLarge)
+                    )
+                    .padding(horizontal = Dimensions.paddingMedium, vertical = Dimensions.spacingSmall),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .background(Color.White, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = Color(0xFF2DB35D),
+                        modifier = Modifier.size(14.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(Dimensions.spacingSmall))
+                Text(
+                    text = stringResource(R.string.saved_to_phone_success),
+                    color = Color.White,
+                    fontSize = 14.sp
+                )
             }
         }
 

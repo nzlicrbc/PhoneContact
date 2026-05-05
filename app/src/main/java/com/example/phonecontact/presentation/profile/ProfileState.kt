@@ -10,5 +10,6 @@ data class ProfileState(
     val showMenu: Boolean = false,
     val isDeleting: Boolean = false,
     val isDeleteSuccess: Boolean = false,
-    val isSavedToDevice: Boolean = false
+    val isSavedToDevice: Boolean = false,
+    val showSavedToast: Boolean = false
 )

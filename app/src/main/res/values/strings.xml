@@ -61,4 +61,10 @@
     <string name="phone_number">Phone Number</string>
     <string name="save_to_phone">Save to My Phone Contact</string>
     <string name="delete_contact_confirmation">Are you sure you want to delete this contact?</string>
+    <string name="saved_to_phone_success">User is added to your phone!</string>
+    <string name="already_in_phone">This contact is already saved your phone.</string>
+    <string name="top_name_matches">TOP NAME MATCHES</string>
+    <string name="search_history_label">SEARCH HISTORY</string>
+    <string name="clear_all">Clear All</string>
+    <string name="remove_history_item">Remove</string>
 </resources>

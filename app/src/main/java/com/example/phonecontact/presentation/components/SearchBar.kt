@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Clear
@@ -23,6 +25,8 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.phonecontact.R
@@ -37,7 +41,9 @@ fun SearchBar(
     placeholder: String = stringResource(R.string.search_placeholder),
     searchHistory: List<SearchHistory> = emptyList(),
     onHistoryItemClick: (String) -> Unit = {},
+    onRemoveHistoryItem: (String) -> Unit = {},
     onClearHistory: () -> Unit = {},
+    onSearchSubmit: (String) -> Unit = {},
     modifier: Modifier = Modifier,
     onFocusChange: (Boolean) -> Unit = {}
 ) {
@@ -59,6 +65,15 @@ fun SearchBar(
                 color = TextPrimary
             ),
             cursorBrush = SolidColor(Blue),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(
+                onSearch = {
+                    if (query.isNotBlank()) {
+                        onSearchSubmit(query)
+                    }
+                    focusManager.clearFocus()
+                }
+            ),
             decorationBox = { innerTextField ->
                 Row(
                     modifier = Modifier
@@ -144,10 +159,11 @@ fun SearchBar(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(R.string.recent_searches),
-                            style = MaterialTheme.typography.labelMedium,
+                            text = stringResource(R.string.search_history_label),
+                            style = MaterialTheme.typography.labelSmall,
                             color = TextSecondary,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.8.sp
                         )
 
                         TextButton(
@@ -158,7 +174,7 @@ fun SearchBar(
                             )
                         ) {
                             Text(
-                                text = stringResource(R.string.clear_history),
+                                text = stringResource(R.string.clear_all),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Blue
                             )
@@ -179,7 +195,8 @@ fun SearchBar(
                                 onClick = {
                                     onHistoryItemClick(historyItem.searchQuery)
                                     focusManager.clearFocus()
-                                }
+                                },
+                                onRemove = { onRemoveHistoryItem(historyItem.searchQuery) }
                             )
                         }
                     }
@@ -193,23 +210,24 @@ fun SearchBar(
 private fun SearchHistoryItem(
     searchHistory: SearchHistory,
     onClick: () -> Unit,
+    onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(
-                horizontal = Dimensions.paddingMedium,
-                vertical = Dimensions.paddingMedium
-            ),
+            .padding(horizontal = Dimensions.paddingMedium, vertical = Dimensions.paddingSmall),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = Icons.Default.Search,
-            contentDescription = null,
-            modifier = Modifier.size(Dimensions.iconMedium),
-            tint = TextSecondary
+        Text(
+            text = "×",
+            style = MaterialTheme.typography.bodyLarge,
+            color = TextSecondary,
+            modifier = Modifier
+                .size(Dimensions.iconMedium)
+                .clickable { onRemove() },
+            textAlign = TextAlign.Center
         )
 
         Spacer(modifier = Modifier.width(Dimensions.spacingMedium))
