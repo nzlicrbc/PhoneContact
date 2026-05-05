@@ -7,6 +7,7 @@ data class NewContactState(
     val profileImageUri: String? = null,
     val profileImageBytes: ByteArray? = null,
     val profileImageUrl: String? = null,
+    val isInDeviceContacts: Boolean = false,
     val isLoading: Boolean = false,
     val isSaving: Boolean = false,
     val error: String? = null,

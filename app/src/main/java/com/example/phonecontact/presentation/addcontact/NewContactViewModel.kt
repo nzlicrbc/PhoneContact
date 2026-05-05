@@ -48,6 +48,7 @@ class NewContactViewModel @Inject constructor(
                             phoneNumber = it.phoneNumber,
                             profileImageUrl = it.profileImageUrl,
                             profileImageUri = it.profileImageUrl,
+                            isInDeviceContacts = it.isInDeviceContacts,
                             isLoading = false
                         )
                     }
@@ -176,7 +177,8 @@ class NewContactViewModel @Inject constructor(
                     firstName = _state.value.firstName,
                     lastName = _state.value.lastName,
                     phoneNumber = _state.value.phoneNumber,
-                    profileImageUrl = _state.value.profileImageUrl
+                    profileImageUrl = _state.value.profileImageUrl,
+                    isInDeviceContacts = _state.value.isInDeviceContacts
                 )
 
                 val result = updateContactUseCase(contact)
@@ -283,7 +285,8 @@ class NewContactViewModel @Inject constructor(
                         firstName = _state.value.firstName,
                         lastName = _state.value.lastName,
                         phoneNumber = _state.value.phoneNumber,
-                        profileImageUrl = imageUrl
+                        profileImageUrl = imageUrl,
+                        isInDeviceContacts = _state.value.isInDeviceContacts
                     )
                     updateContactUseCase(contact)
                 } catch (e: Exception) {
