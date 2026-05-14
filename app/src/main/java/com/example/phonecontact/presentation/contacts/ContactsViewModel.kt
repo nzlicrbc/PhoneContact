@@ -1,14 +1,13 @@
 package com.example.phonecontact.presentation.contacts
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.phonecontact.domain.model.Contact
 import com.example.phonecontact.domain.model.SearchHistory
+import com.example.phonecontact.domain.repository.ContactRepository
 import com.example.phonecontact.domain.usecase.DeleteContactUseCase
 import com.example.phonecontact.domain.usecase.GetContactUseCase
-import com.example.phonecontact.domain.usecase.SearchContactUseCase
+import com.example.phonecontact.domain.usecase.SyncContactUseCase
 import com.example.phonecontact.utils.Constants
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -19,30 +18,24 @@ import javax.inject.Inject
 class ContactsViewModel @Inject constructor(
     private val getContactUseCase: GetContactUseCase,
     private val deleteContactUseCase: DeleteContactUseCase,
-    private val searchContactUseCase: SearchContactUseCase
+    private val syncContactUseCase: SyncContactUseCase,
+    private val repository: ContactRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ContactsState())
     val state: StateFlow<ContactsState> = _state.asStateFlow()
 
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    init {
+        observeSearchHistory()
+    }
+
     fun onEvent(event: ContactsEvent) {
         when (event) {
-            is ContactsEvent.OnScreenAppeared -> {
-                loadContacts()
-            }
-            is ContactsEvent.SearchQueryChanged -> {
-                updateSearchQuery(event.query)
-            }
-            is ContactsEvent.DeleteContact -> {
-                deleteContact(event.contactId)
-            }
-            is ContactsEvent.RemoveFromSearchHistory -> {
-                removeFromSearchHistory(event.query)
-            }
-            ContactsEvent.RefreshContacts -> {
-                loadContacts()
-            }
+            is ContactsEvent.OnScreenAppeared -> loadContacts()
+            is ContactsEvent.SearchQueryChanged -> updateSearchQuery(event.query)
+            is ContactsEvent.DeleteContact -> deleteContact(event.contactId)
+            is ContactsEvent.RemoveFromSearchHistory -> removeFromSearchHistory(event.query)
+            ContactsEvent.RefreshContacts -> loadContacts()
             is ContactsEvent.OnSearchFocusChanged -> {
                 _state.update { it.copy(isSearchActive = event.isFocused) }
             }
@@ -51,9 +44,7 @@ class ContactsViewModel @Inject constructor(
                     addToSearchHistory(event.query)
                 }
             }
-            is ContactsEvent.ClearSearchHistory -> {
-                clearSearchHistory()
-            }
+            is ContactsEvent.ClearSearchHistory -> clearSearchHistory()
         }
     }
 
@@ -62,6 +53,9 @@ class ContactsViewModel @Inject constructor(
             _state.update { it.copy(isLoading = true) }
 
             getContactUseCase().collect { contacts ->
+                if (contacts.isEmpty()) {
+                    syncContactUseCase()
+                }
                 val grouped = groupContactsByFirstLetter(contacts)
                 _state.update {
                     it.copy(
@@ -74,7 +68,15 @@ class ContactsViewModel @Inject constructor(
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    private fun observeSearchHistory() {
+        viewModelScope.launch {
+            repository.getRecentSearches(Constants.MAX_SEARCH_HISTORY_STORAGE)
+                .collect { history ->
+                    _state.update { it.copy(searchHistory = history) }
+                }
+        }
+    }
+
     private fun updateSearchQuery(query: String) {
         _state.update { it.copy(searchQuery = query) }
 
@@ -128,21 +130,14 @@ class ContactsViewModel @Inject constructor(
     private fun addToSearchHistory(query: String) {
         viewModelScope.launch {
             try {
-                val currentHistory = _state.value.searchHistory.toMutableList()
-
-                currentHistory.removeAll { it.searchQuery.equals(query, ignoreCase = true) }
-
-                currentHistory.add(0, SearchHistory(
-                    id = System.currentTimeMillis(),
-                    searchQuery = query,
-                    searchedAt = System.currentTimeMillis()
-                ))
-
-                val limitedHistory = currentHistory.take(Constants.MAX_SEARCH_HISTORY_STORAGE)
-
-                _state.update { it.copy(searchHistory = limitedHistory) }
-
-            } catch (e: Exception) {
+                repository.deleteSearchByQuery(query)
+                repository.insertSearch(
+                    SearchHistory(
+                        searchQuery = query,
+                        searchedAt = System.currentTimeMillis()
+                    )
+                )
+            } catch (_: Exception) {
             }
         }
     }
@@ -150,8 +145,8 @@ class ContactsViewModel @Inject constructor(
     private fun clearSearchHistory() {
         viewModelScope.launch {
             try {
-                _state.update { it.copy(searchHistory = emptyList()) }
-            } catch (e: Exception) {
+                repository.clearAllSearchHistory()
+            } catch (_: Exception) {
             }
         }
     }
@@ -159,11 +154,8 @@ class ContactsViewModel @Inject constructor(
     private fun removeFromSearchHistory(query: String) {
         viewModelScope.launch {
             try {
-                val updatedHistory = _state.value.searchHistory.filter {
-                    !it.searchQuery.equals(query, ignoreCase = true)
-                }
-                _state.update { it.copy(searchHistory = updatedHistory) }
-            } catch (e: Exception) {
+                repository.deleteSearchByQuery(query)
+            } catch (_: Exception) {
             }
         }
     }

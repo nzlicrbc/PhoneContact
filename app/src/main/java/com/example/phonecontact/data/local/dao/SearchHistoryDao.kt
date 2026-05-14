@@ -15,6 +15,9 @@ interface SearchHistoryDao {
     @Insert
     suspend fun insertSearch(searchHistory: SearchHistoryEntity): Long
 
+    @Query("DELETE FROM search_history WHERE search_query = :query")
+    suspend fun deleteByQuery(query: String)
+
     @Query("DELETE FROM search_history")
     suspend fun clearAllHistory()
 }

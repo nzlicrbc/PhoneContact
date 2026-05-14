@@ -91,9 +91,7 @@ fun ContactAvatar(
                                 }
                             }
                         },
-                        onError = { _, throwable ->
-                            println("Image load failed for: $finalImageUrl")
-                        }
+                        onError = { _, _ -> }
                     )
                     .build(),
                 contentDescription = stringResource(R.string.profile_photo_desc),
@@ -185,8 +183,7 @@ private fun extractDominantColorManually(bitmap: Bitmap): Int? {
 
         if (percentage < 5) return null
         dominantColor
-    } catch (e: Exception) {
-        println("Manual color extraction error: ${e.message}")
+    } catch (_: Exception) {
         null
     }
 }

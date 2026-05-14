@@ -14,6 +14,7 @@ import com.example.phonecontact.domain.usecase.DeleteContactUseCase
 import com.example.phonecontact.presentation.navigation.NavigationArgs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -155,9 +156,13 @@ class ProfileViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         isSavedToDevice = true,
+                        showSavedToast = true,
                         contact = it.contact?.copy(isInDeviceContacts = true)
                     )
                 }
+
+                delay(3000L)
+                _state.update { it.copy(showSavedToast = false) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message) }
             }
