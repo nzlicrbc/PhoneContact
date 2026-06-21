@@ -1,41 +1,41 @@
 # Phone Contact
 
 <p align="center">
-  Modern bir Android kişi rehberi uygulaması — kişileri listele, ara, ekle, düzenle ve cihaz rehberine kaydet.
+  A modern Android contacts app — list, search, add, edit contacts, and save them to the device's address book.
 </p>
 
 ---
 
-## 📱 Ekran Görüntüleri
+## 📱 Screenshots
 
-| Kişi Listesi | Arama & Geçmiş | Yeni Kişi |
+| Contact List | Search & History | New Contact |
 |:---:|:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/0128b085-4075-4c2d-a9f7-c21495460387" width="250" alt="Kişi Listesi"/> | <img src="https://github.com/user-attachments/assets/8f0efa88-49e0-492a-bdb6-b02129820211" width="250" alt="Arama ve Geçmiş"/> | <img src="https://github.com/user-attachments/assets/ff4d8703-76c0-4254-9164-65bb06bd79c4" width="250" alt="Yeni Kişi"/> |
+| <img src="https://github.com/user-attachments/assets/0128b085-4075-4c2d-a9f7-c21495460387" width="250" alt="Contact List"/> | <img src="https://github.com/user-attachments/assets/8f0efa88-49e0-492a-bdb6-b02129820211" width="250" alt="Search and History"/> | <img src="https://github.com/user-attachments/assets/ff4d8703-76c0-4254-9164-65bb06bd79c4" width="250" alt="New Contact"/> |
 
-| Profil Detay | Düzenleme |
+| Profile Detail | Editing |
 |:---:|:---:|
-| <img src="https://github.com/user-attachments/assets/500f3eb4-75f8-4424-be64-c2251f72d2c5" width="250" alt="Profil Detay"/> | <img src="https://github.com/user-attachments/assets/848daaaf-4fd1-4215-9183-54f90ec68c04" width="250" alt="Kişi Düzenleme"/> |
+| <img src="https://github.com/user-attachments/assets/500f3eb4-75f8-4424-be64-c2251f72d2c5" width="250" alt="Profile Detail"/> | <img src="https://github.com/user-attachments/assets/848daaaf-4fd1-4215-9183-54f90ec68c04" width="250" alt="Edit Contact"/> |
 
 ---
 
-## ✨ Özellikler
+## ✨ Features
 
-- **Kişi listesi** — Alfabetik gruplama ile tüm kişileri görüntüleme
-- **Arama** — İsme göre anlık arama (minimum 2 karakter)
-- **Arama geçmişi** — Son aramaları kaydetme, tek tek veya toplu temizleme
-- **Kişi ekleme / düzenleme** — Ad, soyad, telefon ve profil fotoğrafı
-- **Profil fotoğrafı** — Kamera veya galeriden seçim, otomatik sıkıştırma ve API'ye yükleme
-- **Profil detay** — Kişi bilgilerini görüntüleme, düzenleme ve silme
-- **Kaydırarak silme** — Swipe ile hızlı kişi silme
-- **Cihaz rehberine kaydet** — Kişiyi telefon rehberine ekleme
-- **Çevrimdışı destek** — Room ile yerel veritabanı, API ile senkronizasyon
-- **Boş durum ekranları** — Kişi yok / sonuç bulunamadı durumları için kullanıcı dostu UI
+- **Contact list** — View all contacts grouped alphabetically
+- **Search** — Instant search by name (minimum 2 characters)
+- **Search history** — Save recent searches; clear individually or all at once
+- **Add / edit contact** — First name, last name, phone number, and profile photo
+- **Profile photo** — Pick from camera or gallery, with automatic compression and upload to the API
+- **Profile detail** — View, edit, and delete contact information
+- **Swipe to delete** — Quickly remove a contact with a swipe gesture
+- **Save to device contacts** — Add the contact to the phone's native address book
+- **Offline support** — Local database with Room, synced with the API
+- **Empty states** — User-friendly UI for "no contacts" / "no results found" scenarios
 
 ---
 
-## 🏗️ Mimari
+## 🏗️ Architecture
 
-Uygulama **Clean Architecture** prensiplerine göre katmanlı yapıda geliştirilmiştir:
+The app follows **Clean Architecture** principles in a layered structure:
 
 ```
 ┌─────────────────────────────────────────┐
@@ -49,19 +49,20 @@ Uygulama **Clean Architecture** prensiplerine göre katmanlı yapıda geliştiri
 │  (Room · Retrofit · Repository Impl)    │
 └─────────────────────────────────────────┘
 ```
-### Kullanılan desenler
 
-| Desen | Açıklama |
-|-------|----------|
-| **MVVM** | UI state yönetimi ViewModel + StateFlow ile |
-| **Repository Pattern** | Yerel (Room) ve uzak (Retrofit) veri kaynaklarını soyutlama |
-| **Use Case** | Her iş kuralı ayrı use case sınıfında |
-| **Dependency Injection** | Hilt ile modüler bağımlılık yönetimi |
-| **Unidirectional Data Flow** | Event → ViewModel → State → UI akışı |
+### Patterns used
+
+| Pattern | Description |
+|---------|-------------|
+| **MVVM** | UI state managed via ViewModel + StateFlow |
+| **Repository Pattern** | Abstracts local (Room) and remote (Retrofit) data sources |
+| **Use Case** | Each business rule lives in its own use case class |
+| **Dependency Injection** | Modular dependency management with Hilt |
+| **Unidirectional Data Flow** | Event → ViewModel → State → UI flow |
 
 ---
 
-## 📂 Proje Yapısı
+## 📂 Project Structure
 
 ```
 app/src/main/java/com/example/phonecontact/
